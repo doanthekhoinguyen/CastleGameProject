@@ -16,7 +16,7 @@ namespace MVC.View
     }
 
     public class HeroView : MonoBehaviour
-    {
+    {   
         [SerializeField] private HeroState state;
         [SerializeField] private GameObject[] weapons;
         [SerializeField] private Animator animator;
@@ -69,41 +69,41 @@ namespace MVC.View
 
         private void Update()
         {
-            //ProcessClash();
+            ProcessClash();
         }
 
-        //private void ProcessClash()
-        //{
-        //    if (State != HeroState.Attack) return;
+        private void ProcessClash()
+        {
+            if (State != HeroState.Attack) return;
 
-        //    if (target.State == MonsterState.Die)
-        //    {
-        //        TryFightNextMonster();
-        //        return;
-        //    }
+            //if (target.State == MonsterState.Die)
+            //{
+            //    TryFightNextMonster();
+            //    return;
+            //}
 
-        //    if (IsRangeHero && HasBehindMonster(target))
-        //    {
-        //        TryFightNextMonster();
-        //        return;
-        //    }
+            //if (IsRangeHero && HasBehindMonster(target))
+            //{
+            //    TryFightNextMonster();
+            //    return;
+            //}
 
-        //    nextAttackTime -= Time.deltaTime;
-        //    if (nextAttackTime <= 0)
-        //    {
-        //        var atkSpeed = data.attackSpeed * GameConst.BaseAttackSpeed;
-        //        var atkStyleIndex = splashStyleCounter % 2;
+            nextAttackTime -= Time.deltaTime;
+            if (nextAttackTime <= 0)
+            {
+                var atkSpeed = data.attackSpeed * GameConst.BaseAttackSpeed;
+                var atkStyleIndex = splashStyleCounter % 2;
 
-        //        animator.SetFloat(SpeedParaName, atkSpeed);
-        //        animator.SetTrigger($"attack{atkStyleIndex}");
+                animator.SetFloat(SpeedParaName, atkSpeed);
+                animator.SetTrigger($"attack{atkStyleIndex}");
 
-        //        var clipDuration = atkAnimationClips[atkStyleIndex].length / atkSpeed;
-        //        nextAttackTime = GameConst.HeroBaseAttackGapDuration / atkSpeed + clipDuration;
-        //        ServiceLocator.Instance.AudioManager.PlaySfx(splashSfx[atkStyleIndex]);
-        //        splashStyleCounter += 1;
-        //        ShowSkill();
-        //    }
-        //}
+                var clipDuration = atkAnimationClips[atkStyleIndex].length / atkSpeed;
+                nextAttackTime = GameConst.HeroBaseAttackGapDuration / atkSpeed + clipDuration;
+                ServiceLocator.Instance.AudioManager.PlaySfx(splashSfx[atkStyleIndex]);
+                splashStyleCounter += 1;
+                ShowSkill();
+            }
+        }
 
         protected virtual void ShowSkill() { }
 
@@ -172,20 +172,20 @@ namespace MVC.View
             boxCollider.enabled = true;
         }
 
-        //public void GetDamage(int damage)
-        //{
-        //    data.hp -= damage * (1 - data.defense / 100);
+        public void GetDamage(int damage)
+        {
+            data.hp -= damage * (1 - data.defense / 100);
 
-        //    if (data.hp <= 0)
-        //    {
-        //        State = HeroState.Die;
-        //        target = null;
-        //        boxCollider.enabled = false;
-        //        StartCoroutine(ShowDeadAnim());
-        //    }
+            if (data.hp <= 0)
+            {
+                State = HeroState.Die;
+                //target = null;
+                boxCollider.enabled = false;
+                StartCoroutine(ShowDeadAnim());
+            }
 
-        //    OnHpChanged?.Invoke();
-        //}
+            OnHpChanged?.Invoke();
+        }
 
         private IEnumerator ShowDeadAnim()
         {

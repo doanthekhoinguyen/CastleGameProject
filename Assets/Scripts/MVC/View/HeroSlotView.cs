@@ -30,7 +30,11 @@ namespace MVC.View
         private void MakeHeroModel()
         {
             heroGameObject = GamePool.Instance.GetObject(Data.HeroModel.id);
-         
+            if (heroGameObject == null)
+            {
+                Debug.LogError($"Hero GameObject with ID {Data.HeroModel.id} could not be obtained from the pool.");
+                return;
+            }
             heroGameObject.transform.SetParent(heroContainer.transform);
             heroGameObject.transform.localPosition = Vector3.zero;
             heroGameObject.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, -90));
@@ -39,12 +43,14 @@ namespace MVC.View
             heroView = heroGameObject.GetComponent<HeroView>();
             if (heroView == null)
             {
-                Debug.LogError("HeroView component is missing on the Hero GameObject");
+                Debug.LogError($"HeroView component could not be found on the Hero GameObject with ID {Data.HeroModel.id}. Make sure your prefab has a HeroView attached.");
+                // Optionally, you can add the HeroView component here if it's appropriate for your setup.
+                // heroView = heroGameObject.AddComponent<HeroView>();
                 return;
             }
-
             heroView.Init(this);
         }
+
 
         public void SetEmpty()
         {

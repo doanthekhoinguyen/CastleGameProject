@@ -299,6 +299,7 @@ namespace MVC.Controller
         private void OnHeroSlotClicked(HeroSlotView heroSlotView)
         {
             curHeroSlotView = heroSlotView;
+            
             switch (heroSlotView.Data.HeroSlotState)
             {
                 case HeroSlotState.None:
