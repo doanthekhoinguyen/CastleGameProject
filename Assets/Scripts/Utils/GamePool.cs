@@ -18,6 +18,10 @@ namespace Castle.CustomUtil
         HeroType1,
         HeroType2,
         HeroType3,
+        HeroType4,
+        HeroType5,
+        HeroType6,
+        HeroType7,
     }
     
     public enum PoolState
