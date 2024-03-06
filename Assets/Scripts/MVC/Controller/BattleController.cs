@@ -49,6 +49,9 @@ namespace MVC.Controller
         private float battleTimer;
         private int heart;
 
+        private AbilityTargetingSystem abilityTargetingSystem;
+
+          
         public void Init(BattleModel battleData)
         {
             data = battleData;
@@ -57,7 +60,9 @@ namespace MVC.Controller
             battleTimer = GameConst.TotalTimeInPerLevel;
             heart = battleData.Heart;
             battleHUD.SetUpHeart(heart);
+
         }
+      
 
         #region Script Life Cycle
 
@@ -123,13 +128,52 @@ namespace MVC.Controller
             // animate
             yield return ShowBattleSlotAnim();
             yield return new WaitForSeconds(1);
+            ServiceLocator.Instance.InputManager.HasBlockInput = false;
+            
+
+        }
+        public void OnEndTurnButtonClicked()
+        {
+
+            //ServiceLocator.Instance.InputManager.HasBlockInput = true;
+            MoveTeam();
+            //reset lại trạng thái
+            foreach (var heroSlot in heroSlotViews)
+            {
+                if (heroSlot.Data != null && heroSlot.Data.HeroModel != null)
+                {
+                    heroSlot.Data.HeroModel.abilityTriggeredThisTurn = false;
+                }
+            }
             BattleState = BattleState.Start;
+
+            
+
+
         }
 
         private void StartBattle()
         {
-            ServiceLocator.Instance.InputManager.HasBlockInput = false;
+            //ServiceLocator.Instance.InputManager.HasBlockInput = false;
             //monsterSpawner.StartTimer();
+
+            //Spawn Enemy 
+
+            // Start of turn ability here
+            foreach (var heroSlot in heroSlotViews)
+            {
+                if (!heroSlot.IsEmpty) // Kiểm tra nếu slot không trống
+                {
+                    var heroAbilities = heroSlot.Data.HeroModel.abilities; // Giả sử HeroModel có danh sách abilities
+                    foreach (var ability in heroAbilities)
+                    {
+                        if (ability.Type == AbilityType.StartOfTurn)
+                        {
+                            OnAbilityTrigger(ability, heroSlot);
+                        }
+                    }
+                }
+            }
             BattleState = BattleState.BeOngoing;
             ServiceLocator.Instance.AudioManager.PlayBgm();
         }
@@ -142,7 +186,9 @@ namespace MVC.Controller
         private void ProcessBattle()
         {
             //monsterSpawner.Update();
-            //if (battleTimer <= 0 && monsterSpawner.HasNoMonsterOnMap()) BattleState = BattleState.End;
+            //if (battleTimer <= 0 && monsterSpawner.HasNoMonsterOnMap()) BattleState = BattleState.End;]
+
+            // Hurt & Faint Ability heare
         }
 
         private void EndBattle()
@@ -291,7 +337,7 @@ namespace MVC.Controller
             ServiceLocator.Instance.InputManager.OnPlaneClicked -= OnPlaneClicked;
         }
 
-        private void OnPlaneClicked()
+        private void OnPlaneClicked()   
         {
             battleHUD.HideAllPanel();
         }
@@ -331,6 +377,31 @@ namespace MVC.Controller
                 {
                     SlotIndex = i
                 });
+            }
+        }
+
+        public void MoveTeam()
+        {
+            bool hasMoved = true; // Biến kiểm tra xem có sự di chuyển nào xảy ra không
+            while (hasMoved) // Tiếp tục vòng lặp cho đến khi không có sự di chuyển nào nữa 
+            {
+                hasMoved = false; // Reset lại trạng thái di chuyển
+                for (int i = 0; i < heroSlotViews.Length - 1; i++)
+                {
+                    // Nếu slot hiện tại trống và slot tiếp theo không trống
+                    if (heroSlotViews[i].IsEmpty && !heroSlotViews[i + 1].IsEmpty)
+                    {
+                        // Di chuyển hero từ slot tiếp theo vào slot hiện tại
+                        heroSlotViews[i].SetHero(heroSlotViews[i + 1].Data.HeroModel);
+                        heroSlotViews[i + 1].SetEmpty();
+
+                        // Cập nhật hiển thị cho mỗi slot
+                        heroSlotViews[i].ShowHero();
+                        heroSlotViews[i + 1].ShowNoneSlot();
+
+                        hasMoved = true; // Đánh dấu đã có sự di chuyển
+                    }
+                }
             }
         }
 
@@ -427,6 +498,49 @@ namespace MVC.Controller
 
             return true;
         }
+        #endregion
+
+        #region Ability
+        void Start()
+        {
+            List<HeroSlotView> heroSlotList = new List<HeroSlotView>(heroSlotViews);
+            abilityTargetingSystem = new AbilityTargetingSystem(heroSlotList);
+        }
+        public void OnAbilityTrigger(AbilityModel ability, HeroSlotView casterSlot)
+        {
+            // Sử dụng AbilityTargetingSystem để lấy target
+            HeroSlotView targetSlot = abilityTargetingSystem.GetTarget(ability, casterSlot);
+
+            // Áp dụng effect lên target
+            if (targetSlot != null)     
+            {
+                ApplyEffect(ability, targetSlot);
+                battleHUD.UpdateHeroInfo(curHeroSlotView.Data.HeroModel);
+            }
+        }
+        public void ApplyEffect(AbilityModel ability, HeroSlotView targetSlot)
+        {
+            if (targetSlot != null && targetSlot.Data != null && targetSlot.Data.HeroModel != null)
+            {
+                // Chỉ áp dụng nếu ability chưa được kích hoạt trong lượt này
+                if (!targetSlot.Data.HeroModel.abilityTriggeredThisTurn)
+                {
+                    switch (ability.Type)
+                    {
+                        case AbilityType.StartOfTurn:
+                            targetSlot.Data.HeroModel.hp += ability.magnitude;
+                            targetSlot.Data.HeroModel.abilityTriggeredThisTurn = true; // Đánh dấu là đã kích hoạt
+                            break;
+                            // Các trường hợp khác...
+                    }
+                }
+            }
+        }
+
+
+
+
+
         #endregion
     }
 }

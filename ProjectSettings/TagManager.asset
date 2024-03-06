@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - HeroSlot
+  - Plane
   layers:
   - Default
   - TransparentFX

@@ -42,6 +42,7 @@ namespace MVC.View
         [SerializeField] private TextMeshProUGUI lbSellCoin;
         [SerializeField] private Image heroPortrait;
         [SerializeField] private Button btnUpgrade;
+        [SerializeField] private Button btnEndTurn;
         [SerializeField] private CanvasGroup upgradeCanvasGroup;
 
         [SerializeField] private CameraController cameraController;
@@ -205,6 +206,14 @@ namespace MVC.View
             hasPaused = !hasPaused;
             Time.timeScale = hasPaused ? 0 : 1;
             pauseLayer.SetActive(hasPaused);
+        }
+        void Start()
+        {
+            btnEndTurn.onClick.AddListener(EndTurn); // Đăng ký sự kiện khi nút được nhấn
+        }
+        public void EndTurn()
+        {
+            battleController.OnEndTurnButtonClicked(); // Gọi phương thức trong BattleController
         }
         #endregion
     }

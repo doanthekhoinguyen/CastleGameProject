@@ -19,6 +19,13 @@ MonoBehaviour:
   defense: 0
   attackSpeed: 1
   attackType: 0
+  abilityTriggeredThisTurn: 0
+  abilities:
+  - Type: 0
+    target: 0
+    effect: 0
+    magnitude: 1
+    description: Start of Turn -> buff 1 hp
   fullPortraitPath: HeroType6-full
   miniPortraitPath: HeroType6-mini
   coin: 3

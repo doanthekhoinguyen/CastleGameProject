@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace MVC.View
 {
-    public class HeroSlotView : MonoBehaviour
+    public class HeroSlotView : MonoBehaviour   
     {
         [SerializeField] private GameObject flag;
         [SerializeField] private GameObject heroContainer;
@@ -15,6 +15,11 @@ namespace MVC.View
         public HeroView heroView;
 
         private GameObject heroGameObject;
+
+        public bool IsEmpty
+        {
+            get { return Data.HeroModel == null; }
+        }
 
         public void Init(HeroSlotModel heroSlotModel)
         {

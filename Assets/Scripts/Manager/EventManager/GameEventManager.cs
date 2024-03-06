@@ -11,7 +11,11 @@ namespace Castle.CustomUtil.EventManager
         Combat,
         HeroDead,
         MonsterDead,
-        MonsterEnterCastle
+        MonsterEnterCastle,
+        //Ability Event
+        StartOfTurn, 
+        Hurt, 
+        Faint 
     }
 
     /// <summary>
