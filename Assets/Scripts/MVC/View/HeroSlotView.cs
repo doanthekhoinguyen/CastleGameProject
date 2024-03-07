@@ -1,6 +1,7 @@
 using Castle.CustomUtil;
 using MVC.Model;
 using UnityEngine;
+using MVC.Controller;
 
 namespace MVC.View
 {
@@ -10,6 +11,8 @@ namespace MVC.View
         [SerializeField] private GameObject heroContainer;
         [Header("VFX")]
         [SerializeField] private GameObject vfxUpgrade;
+        public ParticleSystem abilityVFX; // Thêm vào HeroSlotView
+
 
         public HeroSlotModel Data;
         public HeroView heroView;
@@ -85,5 +88,14 @@ namespace MVC.View
             vfxUpgrade.SetActive(false);
             vfxUpgrade.SetActive(true);
         }
+        public void ActivateAbilityVFX(HeroSlotView heroSlot)
+        {
+            // Ví dụ: Kích hoạt particle system đã được thêm vào trước đó trong Unity Editor
+            if (heroSlot.abilityVFX != null)
+            {
+                heroSlot.abilityVFX.Play();
+            }
+        }
+
     }
 }

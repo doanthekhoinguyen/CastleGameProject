@@ -24,7 +24,8 @@ MonoBehaviour:
   - Type: 0
     target: 0
     effect: 0
-    magnitude: 1
+    hpChange: 0
+    atkChange: 1
     description: Start of Turn -> buff 1 hp
   fullPortraitPath: HeroType6-full
   miniPortraitPath: HeroType6-mini

@@ -24,7 +24,8 @@ MonoBehaviour:
   - Type: 0
     target: 1
     effect: 0
-    magnitude: 5
+    hpChange: 1
+    atkChange: 0
     description: 
   fullPortraitPath: HeroType5-full
   miniPortraitPath: HeroType5-mini

@@ -164,7 +164,7 @@ namespace MVC.Controller
             {
                 if (!heroSlot.IsEmpty) // Kiểm tra nếu slot không trống
                 {
-                    var heroAbilities = heroSlot.Data.HeroModel.abilities; // Giả sử HeroModel có danh sách abilities
+                    var heroAbilities = heroSlot.Data.HeroModel.abilities; 
                     foreach (var ability in heroAbilities)
                     {
                         if (ability.Type == AbilityType.StartOfTurn)
@@ -515,32 +515,37 @@ namespace MVC.Controller
             if (targetSlot != null)     
             {
                 ApplyEffect(ability, targetSlot);
-                battleHUD.UpdateHeroInfo(curHeroSlotView.Data.HeroModel);
+               
             }
         }
         public void ApplyEffect(AbilityModel ability, HeroSlotView targetSlot)
         {
             if (targetSlot != null && targetSlot.Data != null && targetSlot.Data.HeroModel != null)
             {
-                // Chỉ áp dụng nếu ability chưa được kích hoạt trong lượt này
                 if (!targetSlot.Data.HeroModel.abilityTriggeredThisTurn)
                 {
+                    int level = targetSlot.Data.HeroModel.upgradeLevel;
+                    int hpChange = ability.hpChange * level;
+                    int atkChange = ability.atkChange * level;
                     switch (ability.Type)
                     {
                         case AbilityType.StartOfTurn:
-                            targetSlot.Data.HeroModel.hp += ability.magnitude;
-                            targetSlot.Data.HeroModel.abilityTriggeredThisTurn = true; // Đánh dấu là đã kích hoạt
+                            targetSlot.Data.HeroModel.hp += hpChange;
+                            targetSlot.Data.HeroModel.attack += atkChange;
+                            // Kích hoạt VFX
+                            targetSlot.ActivateAbilityVFX(targetSlot);
                             break;
-                            // Các trường hợp khác...
+                        case AbilityType.Hurt:
+                            break;
+                        case AbilityType.Faint:
+                            break;
                     }
+                    targetSlot.Data.HeroModel.abilityTriggeredThisTurn = true;
+                    battleHUD.UpdateHeroInfo(targetSlot.Data.HeroModel);
                 }
             }
         }
-
-
-
-
-
+        
         #endregion
     }
 }

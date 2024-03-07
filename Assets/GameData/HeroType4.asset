@@ -19,6 +19,14 @@ MonoBehaviour:
   defense: 0
   attackSpeed: 1
   attackType: 0
+  abilityTriggeredThisTurn: 0
+  abilities:
+  - Type: 0
+    target: 0
+    effect: 0
+    hpChange: 0
+    atkChange: 0
+    description: 
   fullPortraitPath: HeroType4-full
   miniPortraitPath: HeroType4-mini
   coin: 3
