@@ -1,11 +1,13 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using Castle.CustomUtil;
 using Castle.CustomUtil.EventManager;
 using MVC.Model;
 using MVC.View;
 using UnityEngine;
+using static UnityEngine.EventSystems.EventTrigger;
 using Random = UnityEngine.Random;
 
 namespace MVC.Controller
@@ -26,7 +28,10 @@ namespace MVC.Controller
         [SerializeField] private BattleHUD battleHUD;
         [SerializeField] private Camera battleCamera;
         [SerializeField] private HeroSlotView[] heroSlotViews;
-        //[SerializeField] private MonsterSpawner monsterSpawner;
+        [SerializeField] private HeroSlotView[] enemySlotViews;
+        [SerializeField] private LevelController levelController;
+
+
 
         public int Coin { get; private set; }
 
@@ -48,21 +53,28 @@ namespace MVC.Controller
         private HeroSlotView curHeroSlotView;
         private float battleTimer;
         private int heart;
+    
 
         private AbilityTargetingSystem abilityTargetingSystem;
 
-          
+
         public void Init(BattleModel battleData)
         {
+
             data = battleData;
+            if (data.CurrentLevel == 0)
+            {
+                data.CurrentLevel = 1;
+            }
             BattleState = BattleState.Prepare;
             gameCollectionManager = ServiceLocator.Instance.GameCollectionManager;
             battleTimer = GameConst.TotalTimeInPerLevel;
             heart = battleData.Heart;
+
             battleHUD.SetUpHeart(heart);
 
         }
-      
+
 
         #region Script Life Cycle
 
@@ -121,15 +133,19 @@ namespace MVC.Controller
             battleHUD.Init(this, heroes);
             battleHUD.SetBeginLayout(data.InitCoin);
 
+            ////SetupLevel
+            //SetupLevelForCurrent(data.CurrentLevel);
+
             // fill data
             Coin = data.InitCoin;
             SetUpHeroSlot();
+            SetUpEnemySlot();
 
             // animate
             yield return ShowBattleSlotAnim();
             yield return new WaitForSeconds(1);
             ServiceLocator.Instance.InputManager.HasBlockInput = false;
-            
+
 
         }
         public void OnEndTurnButtonClicked()
@@ -146,8 +162,12 @@ namespace MVC.Controller
                 }
             }
             BattleState = BattleState.Start;
+            levelController.SpawnEnemiesForCurrentLevel();
 
-            
+
+
+
+
 
 
         }
@@ -164,7 +184,7 @@ namespace MVC.Controller
             {
                 if (!heroSlot.IsEmpty) // Kiểm tra nếu slot không trống
                 {
-                    var heroAbilities = heroSlot.Data.HeroModel.abilities; 
+                    var heroAbilities = heroSlot.Data.HeroModel.abilities;
                     foreach (var ability in heroAbilities)
                     {
                         if (ability.Type == AbilityType.StartOfTurn)
@@ -337,7 +357,7 @@ namespace MVC.Controller
             ServiceLocator.Instance.InputManager.OnPlaneClicked -= OnPlaneClicked;
         }
 
-        private void OnPlaneClicked()   
+        private void OnPlaneClicked()
         {
             battleHUD.HideAllPanel();
         }
@@ -345,7 +365,7 @@ namespace MVC.Controller
         private void OnHeroSlotClicked(HeroSlotView heroSlotView)
         {
             curHeroSlotView = heroSlotView;
-            
+
             switch (heroSlotView.Data.HeroSlotState)
             {
                 case HeroSlotState.None:
@@ -379,6 +399,17 @@ namespace MVC.Controller
                 });
             }
         }
+        private void SetUpEnemySlot()
+        {
+            for (int i = 0; i < enemySlotViews.Length; i++)
+            {
+                enemySlotViews[i].Init(new HeroSlotModel() // Hoặc một model phù hợp khác nếu bạn dùng riêng cho enemy
+                {
+                    SlotIndex = i
+                });
+            }
+        }
+
 
         public void MoveTeam()
         {
@@ -436,13 +467,13 @@ namespace MVC.Controller
         private int GetUpgradeCoin(HeroModel hero)
         {
             var heroLevel = hero.upgradeLevel;
-            return Mathf.FloorToInt(hero.coin * heroLevel * GameConst.UpgradeCostCoefficient);
+            return Mathf.FloorToInt(GameConst.UpgradeCostCoefficient);
         }
 
         private int GetSellCoin(HeroModel hero)
         {
             var heroLevel = hero.upgradeLevel;
-            return Mathf.FloorToInt(hero.coin * heroLevel * GameConst.SellCostCoefficient);
+            return Mathf.FloorToInt(GameConst.SellCostCoefficient);
         }
 
         private void AddCoin(int value)
@@ -512,10 +543,10 @@ namespace MVC.Controller
             HeroSlotView targetSlot = abilityTargetingSystem.GetTarget(ability, casterSlot);
 
             // Áp dụng effect lên target
-            if (targetSlot != null)     
+            if (targetSlot != null)
             {
                 ApplyEffect(ability, targetSlot);
-               
+
             }
         }
         public void ApplyEffect(AbilityModel ability, HeroSlotView targetSlot)
@@ -545,7 +576,55 @@ namespace MVC.Controller
                 }
             }
         }
-        
+
         #endregion
+
+        #region Level
+        public void SpawnEnemies(LevelConfigModel.EnemySpawn[] enemySpawns)
+        {
+            foreach (var enemySpawn in enemySpawns)
+            {
+                SpawnEnemyAtSlot(enemySpawn.enemyType, enemySpawn.slotIndex);
+            }
+        }
+
+        public void SetUpLevel(LevelConfigModel.LevelCharacterSpawn levelConfig)
+        {
+
+            Coin = levelConfig.initialCoin;
+            battleHUD.SetCoin(Coin);
+
+
+            foreach (var enemySpawn in levelConfig.enemiesToSpawn)
+            {
+                SpawnEnemyAtSlot(enemySpawn.enemyType, enemySpawn.slotIndex);
+            }
+
+        }
+
+        private void SpawnEnemyAtSlot(PoolName enemyType, int slotIndex)
+        {
+
+            if (slotIndex < 0 || slotIndex >= enemySlotViews.Length)
+            {
+                Debug.LogError("Slot index is out of range.");
+                return;
+            }
+            enemySlotViews[slotIndex].ClearSlot();
+
+            HeroModel enemyModel = gameCollectionManager.GetHeroInfo(enemyType);
+            if (enemyModel == null)
+            {
+                Debug.LogError($"Unable to find enemy model of type {enemyType}");
+                return;
+            }
+
+            // Đặt enemy vào slot.
+            enemySlotViews[slotIndex].SetHero(enemyModel);
+            enemySlotViews[slotIndex].ShowHero();
+            #endregion
+        }
+
+
     }
 }

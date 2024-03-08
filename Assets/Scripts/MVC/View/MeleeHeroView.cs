@@ -11,11 +11,11 @@ namespace MVC.View
     {
         private void OnTriggerEnter(Collider other)
         {
-            //var monsterView = other.GetComponent<MonsterView>();
-            
+            var meleeHeroView = other.GetComponent<MeleeHeroView>();
+
             var eventData = new Dictionary<string, object>();
             eventData.Add(GameConst.HeroEventName, this);
-            //eventData.Add(GameConst.MonsterEventName, monsterView);
+            eventData.Add(GameConst.MonsterEventName, meleeHeroView);
             eventData.Add(GameConst.CombatPhaseEventName, CombatPhase.HeroAttackMonster);
             ServiceLocator.Instance.GameEventManager.Dispatch(GameEvent.Combat, eventData);
         }

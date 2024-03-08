@@ -11,7 +11,7 @@ namespace MVC.View
         [SerializeField] private GameObject heroContainer;
         [Header("VFX")]
         [SerializeField] private GameObject vfxUpgrade;
-        public ParticleSystem abilityVFX; // Thêm vào HeroSlotView
+        public ParticleSystem abilityVFX; 
 
 
         public HeroSlotModel Data;
@@ -34,6 +34,7 @@ namespace MVC.View
             Data.HeroModel = hero;
             MakeHeroModel();
         }
+     
 
         private void MakeHeroModel()
         {
@@ -94,6 +95,16 @@ namespace MVC.View
             if (heroSlot.abilityVFX != null)
             {
                 heroSlot.abilityVFX.Play();
+            }
+        }
+        public void ClearSlot()
+        {
+            if (heroGameObject != null)
+            {
+                GamePool.Instance.Release(heroGameObject);
+                heroGameObject = null;
+                Data.HeroModel = null;
+                heroView = null;
             }
         }
 

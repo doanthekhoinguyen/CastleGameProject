@@ -13,8 +13,8 @@ public class GameConst
    // Game config
    public const float BattleTme = 1;
    public const float BaseAttackSpeed = 1;
-   public const float UpgradeCostCoefficient = 1.75f;
-   public const float SellCostCoefficient = 0.5f;
+   public const int UpgradeCostCoefficient = 3;
+   public const float SellCostCoefficient = 1;
    public const float BeHitMonsterDelayTime = 0.5f;
    public const float TotalTimeInPerLevel =  60 * 3; // in second
    

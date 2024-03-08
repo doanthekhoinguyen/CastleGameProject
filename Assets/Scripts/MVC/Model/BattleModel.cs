@@ -6,5 +6,6 @@ namespace MVC.Model
     {
         public int InitCoin;
         public int Heart;
+        public int CurrentLevel;
     }
 }
