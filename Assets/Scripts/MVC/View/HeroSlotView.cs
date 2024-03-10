@@ -2,6 +2,7 @@ using Castle.CustomUtil;
 using MVC.Model;
 using UnityEngine;
 using MVC.Controller;
+using System;
 
 namespace MVC.View
 {
@@ -29,14 +30,14 @@ namespace MVC.View
             Data = heroSlotModel;
         }
 
-        public void SetHero(HeroModel hero)
+        public void SetHero(HeroModel hero, bool isEnemy)
         {
             Data.HeroModel = hero;
-            MakeHeroModel();
+            MakeHeroModel(isEnemy);
         }
      
 
-        private void MakeHeroModel()
+        private void MakeHeroModel(bool isEnemy)
         {
             heroGameObject = GamePool.Instance.GetObject(Data.HeroModel.id);
             if (heroGameObject == null)
@@ -44,6 +45,8 @@ namespace MVC.View
                 Debug.LogError($"Hero GameObject with ID {Data.HeroModel.id} could not be obtained from the pool.");
                 return;
             }
+
+            heroGameObject.tag = isEnemy ? "Enemy" : "Hero";
             heroGameObject.transform.SetParent(heroContainer.transform);
             heroGameObject.transform.localPosition = Vector3.zero;
             heroGameObject.transform.localRotation = Quaternion.Euler(new Vector3(0, 90, -90));

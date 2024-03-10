@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   objectName: PeaSant
-  hp: 3
+  hp: 6
   attack: 1
   defense: 0
   attackSpeed: 1

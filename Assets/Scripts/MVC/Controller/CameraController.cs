@@ -1,25 +1,25 @@
-using System.Collections;
 using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    public Transform targetPosition; // Vị trí mà camera sẽ di chuyển đến
-    public float moveSpeed = 5f; // Tốc độ di chuyển của camera
+    public Camera mainCamera; // Camera chính mà bạn sử dụng ban đầu
+    public Camera secondaryCamera; // Camera thứ hai mà bạn muốn chuyển đổi sang
 
-    // Phương thức này được gọi khi bạn muốn camera di chuyển đến vị trí mới
-    public void MoveCameraToPosition()
+    private bool isUsingMainCamera = true; // Biến kiểm tra xem camera nào đang được sử dụng
+
+    void Start()
     {
-        // Bắt đầu coroutine để di chuyển camera
-        StartCoroutine(MoveToPosition(targetPosition.position, targetPosition.rotation, moveSpeed));
+        // Khi bắt đầu, đảm bảo rằng mainCamera được bật và secondaryCamera được tắt
+        mainCamera.gameObject.SetActive(true);
+        secondaryCamera.gameObject.SetActive(false);
     }
 
-    private IEnumerator MoveToPosition(Vector3 targetPos, Quaternion targetRot, float speed)
+    public void ToggleCamera()
     {
-        while (Vector3.Distance(transform.position, targetPos) > 0.05f)
-        {
-            transform.position = Vector3.MoveTowards(transform.position, targetPos, speed * Time.deltaTime);
-            yield return null;
-        }
-    }
+        isUsingMainCamera = !isUsingMainCamera; // Đảo giá trị để chuyển đổi camera
 
+        // Dựa vào giá trị của isUsingMainCamera để bật/tắt camera tương ứng
+        mainCamera.gameObject.SetActive(isUsingMainCamera);
+        secondaryCamera.gameObject.SetActive(!isUsingMainCamera);
+    }
 }

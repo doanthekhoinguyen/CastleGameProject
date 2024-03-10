@@ -423,7 +423,7 @@ namespace MVC.Controller
                     if (heroSlotViews[i].IsEmpty && !heroSlotViews[i + 1].IsEmpty)
                     {
                         // Di chuyển hero từ slot tiếp theo vào slot hiện tại
-                        heroSlotViews[i].SetHero(heroSlotViews[i + 1].Data.HeroModel);
+                        heroSlotViews[i].SetHero(heroSlotViews[i + 1].Data.HeroModel, false);
                         heroSlotViews[i + 1].SetEmpty();
 
                         // Cập nhật hiển thị cho mỗi slot
@@ -453,7 +453,7 @@ namespace MVC.Controller
         {
             var hero = gameCollectionManager.GetHeroInfo(poolName);
             AddCoin(hero.coin * -1);
-            curHeroSlotView.SetHero(hero);
+            curHeroSlotView.SetHero(hero, false);
             curHeroSlotView.ShowHero();
             battleHUD.UpdateHeroInfo(hero);
         }
@@ -490,18 +490,22 @@ namespace MVC.Controller
             if (!ValidateCombatEventData(eventData)) return;
 
             var hero = eventData[GameConst.HeroEventName] as HeroView;
-            //var monster = eventData[GameConst.MonsterEventName] as MonsterView;
-            var combatPhase = (CombatPhase)eventData[GameConst.CombatPhaseEventName];
+            var monster = eventData[GameConst.MonsterEventName] as HeroView;
 
-            switch (combatPhase)
-            {
-                case CombatPhase.HeroAttackMonster:
-                    //hero.AttackTarget(monster);
-                    break;
-                case CombatPhase.MonsterAttackHero:
-                    //monster.AttackTarget(hero);
-                    break;
-            }
+            hero.AttackTarget(monster);
+            monster.AttackTarget(hero);
+
+            //var combatPhase = (CombatPhase)eventData[GameConst.CombatPhaseEventName];
+
+            //switch (combatPhase)
+            //{
+            //    case CombatPhase.HeroAttackMonster:
+            //        hero.AttackTarget(monster);
+            //        break;
+            //    case CombatPhase.MonsterAttackHero:
+            //        monster.AttackTarget(hero);
+            //        break;
+            //}
         }
 
         private bool ValidateCombatEventData(Dictionary<string, object> eventData)
@@ -620,7 +624,7 @@ namespace MVC.Controller
             }
 
             // Đặt enemy vào slot.
-            enemySlotViews[slotIndex].SetHero(enemyModel);
+            enemySlotViews[slotIndex].SetHero(enemyModel, true);
             enemySlotViews[slotIndex].ShowHero();
             #endregion
         }

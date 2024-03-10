@@ -39,7 +39,7 @@ namespace MVC.Controller
             return null;
         }
 
-        // Coroutine để setup level, cho phép thêm các hiệu ứng chuyển đổi mượt mà, v.v.
+        // Coroutine để setup level
         private IEnumerator SetupLevelRoutine(LevelConfigModel.LevelCharacterSpawn levelConfig)
         {
             // Ví dụ: Thêm hiệu ứng chuyển đổi trước khi load level mới.
@@ -54,8 +54,6 @@ namespace MVC.Controller
             // Ví dụ: Thêm hiệu ứng chuyển đổi sau khi load level mới.
             // FadeIn();
         }
-
-        // Phương thức để chuyển đến level tiếp theo.
         public void NextLevel()
         {
             SetupLevel(++currentLevel);

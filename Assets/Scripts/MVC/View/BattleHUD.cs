@@ -46,6 +46,7 @@ namespace MVC.View
         [SerializeField] private CanvasGroup upgradeCanvasGroup;
 
         [SerializeField] private CameraController cameraController;
+        [SerializeField] private Button toggleCameraButton;
 
 
         private BattleController battleController;
@@ -76,21 +77,7 @@ namespace MVC.View
             }
         }
 
-        public void OnViewBattleButtonPressed()
-        {
-            Debug.Log("OnViewBattleButtonPressed called.");
-            if (cameraController != null)
-            {
-                cameraController.MoveCameraToPosition();
-            }
-            else
-            {
-                Debug.LogError("CameraController is null.");
-            }
-        }
-
-
-
+        
         public void SetCoin(int value)
         {
             lbCoin.text = $"{value}";
@@ -209,7 +196,19 @@ namespace MVC.View
         }
         void Start()
         {
+            if (toggleCameraButton != null)
+            {
+                toggleCameraButton.onClick.AddListener(ToggleCameraView); // Đăng ký sự kiện khi nút được nhấn
+            }
             btnEndTurn.onClick.AddListener(EndTurn); // Đăng ký sự kiện khi nút được nhấn
+        }
+       
+        public void ToggleCameraView()
+        {
+            if (cameraController != null)
+            {
+                cameraController.ToggleCamera(); 
+            }
         }
         public void EndTurn()
         {
@@ -217,4 +216,7 @@ namespace MVC.View
         }
         #endregion
     }
+    #region camera
+
+    #endregion
 }

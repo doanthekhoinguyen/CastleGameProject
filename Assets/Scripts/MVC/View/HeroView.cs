@@ -26,7 +26,7 @@ namespace MVC.View
 
         public Action OnHpChanged;
 
-        //protected MonsterView target;
+        protected HeroView target;
 
         private float nextAttackTime;
         protected HeroModel data;
@@ -44,20 +44,20 @@ namespace MVC.View
             protected set => state = value;
         }
 
-        //public void AttackTarget(MonsterView monster)
-        //{
-        //    if (target != null)
-        //    {
-        //        // No need attack when hero already was in clash with other monster
-        //        // But we add keep the monster in queue to fight later
-        //        hittingMonsters.Enqueue(monster);
-        //        return;
-        //    }
+        public void AttackTarget(HeroView targetView)
+        {
+            //if (target != null)
+            //{
+            //    // No need attack when hero already was in clash with other monster
+            //    // But we add keep the monster in queue to fight later
+            //    hittingMonsters.Enqueue(monster);
+            //    return;
+            //}
 
-        //    nextAttackTime = 0;
-        //    target = monster;
-        //    State = HeroState.Attack;
-        //}
+            nextAttackTime = 0;
+            target = targetView;
+            State = HeroState.Attack;
+        }
 
         public void SetWeapon(int level)
         {
@@ -76,11 +76,10 @@ namespace MVC.View
         {
             if (State != HeroState.Attack) return;
 
-            //if (target.State == MonsterState.Die)
-            //{
-            //    TryFightNextMonster();
-            //    return;
-            //}
+            if (target.State == HeroState.Die)
+            {
+                return;
+            }
 
             //if (IsRangeHero && HasBehindMonster(target))
             //{
@@ -92,8 +91,8 @@ namespace MVC.View
             if (nextAttackTime <= 0)
             {
                 var atkSpeed = data.attackSpeed * GameConst.BaseAttackSpeed;
-                var atkStyleIndex = splashStyleCounter % 2;
-
+                var atkStyleIndex = splashStyleCounter % splashSfx.Length;
+                Debug.Log($"{this.heroSlotView.Data.HeroModel.objectName} atkIndex {atkStyleIndex}");
                 animator.SetFloat(SpeedParaName, atkSpeed);
                 animator.SetTrigger($"attack{atkStyleIndex}");
 
@@ -174,12 +173,13 @@ namespace MVC.View
 
         public void GetDamage(int damage)
         {
+            Debug.Log(this.heroSlotView.Data.HeroModel.objectName + " GET DAMAGE " + damage.ToString());
             data.hp -= damage * (1 - data.defense / 100);
 
             if (data.hp <= 0)
             {
                 State = HeroState.Die;
-                //target = null;
+                target = null;
                 boxCollider.enabled = false;
                 StartCoroutine(ShowDeadAnim());
             }
@@ -195,5 +195,7 @@ namespace MVC.View
             eventData.Add(GameConst.HeroDeadEventName, heroSlotView);
             ServiceLocator.Instance.GameEventManager.Dispatch(GameEvent.HeroDead, eventData);
         }
+
+        
     }
 }
