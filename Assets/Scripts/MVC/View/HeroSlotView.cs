@@ -17,6 +17,10 @@ namespace MVC.View
 
         public HeroSlotModel Data;
         public HeroView heroView;
+        public bool IsHero
+        {
+            get; private set;
+        }
 
         private GameObject heroGameObject;
 
@@ -34,6 +38,7 @@ namespace MVC.View
         {
             Data.HeroModel = hero;
             MakeHeroModel(isEnemy);
+            IsHero = !isEnemy;
         }
      
 
@@ -62,8 +67,7 @@ namespace MVC.View
             }
             heroView.Init(this);
         }
-
-
+        
         public void SetEmpty()
         {
             GamePool.Instance.Release(heroGameObject);
@@ -76,6 +80,11 @@ namespace MVC.View
         {
             Data.HeroSlotState = HeroSlotState.None;
             flag.SetActive(true);
+            heroContainer.SetActive(false);
+        }
+        public void ShowNoneSlotv2()
+        {
+            Data.HeroSlotState = HeroSlotState.None;
             heroContainer.SetActive(false);
         }
 
@@ -100,6 +109,7 @@ namespace MVC.View
                 heroSlot.abilityVFX.Play();
             }
         }
+       
         public void ClearSlot()
         {
             if (heroGameObject != null)

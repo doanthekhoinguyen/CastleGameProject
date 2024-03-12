@@ -22,7 +22,7 @@ public enum AbilityTarget
     Random
 }
 [Serializable]
-public struct AbilityModel
+public class AbilityModel
 { 
     public AbilityType Type;
     public AbilityTarget target;

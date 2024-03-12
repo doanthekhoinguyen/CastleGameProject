@@ -55,8 +55,12 @@ MonoBehaviour:
   - {fileID: 5789348966129302450}
   - {fileID: 5789348967569697510}
   audioLib:
-  - {fileID: 0}
-  audioPenalty: []
+  - {fileID: 8300000, guid: 2b41e44b6cd22e34599a09d41734b670, type: 3}
+  - {fileID: 8300000, guid: 2880b865a7ee30c409434fe178380a0d, type: 3}
+  - {fileID: 8300000, guid: 47d407a171101194b8a17ade58143776, type: 3}
+  audioPenalty:
+  - {fileID: 8300000, guid: 4e0e6ee606848594c903ad2f774a5391, type: 3}
+  - {fileID: 8300000, guid: c84122c37449034439de602f7d907eb5, type: 3}
 --- !u!1 &5789348965906373153
 GameObject:
   m_ObjectHideFlags: 0

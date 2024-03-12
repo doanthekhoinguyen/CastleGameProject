@@ -7,7 +7,6 @@ namespace Castle.CustomUtil
     public class GameCollectionManager : MonoBehaviour
     {
         [SerializeField] private HeroModel[] heroModels;
-        //[SerializeField] private MonsterModel[] monsterModels;
         [SerializeField] private TavernModel tavern;
 
         public HeroModel GetHeroInfo(PoolName poolName)
@@ -21,16 +20,6 @@ namespace Castle.CustomUtil
             return ScriptableObject.Instantiate(heroModels[0]);
         }
         
-        //public MonsterModel GetMonsterInfo(PoolName poolName)
-        //{
-        //    for (int i = 0; i < monsterModels.Length; i++)
-        //    {
-        //        if (monsterModels[i].id == poolName) return ScriptableObject.Instantiate(monsterModels[i]);
-        //    }
-
-        //    Debug.LogError("Not found monster info, fallback default");
-        //    return ScriptableObject.Instantiate(monsterModels[0]);
-        //}
 
         public List<HeroModel> GetTavernHeroes()
         {

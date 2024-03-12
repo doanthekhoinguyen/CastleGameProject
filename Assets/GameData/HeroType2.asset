@@ -29,6 +29,6 @@ MonoBehaviour:
     description: 
   fullPortraitPath: HeroType2-full
   miniPortraitPath: HeroType2-mini
-  coin: 5
+  coin: 3
   upgradeLevel: 1
   maxUpgradeLevel: 3

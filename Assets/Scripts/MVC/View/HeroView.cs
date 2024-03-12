@@ -32,7 +32,7 @@ namespace MVC.View
         protected HeroModel data;
         private HeroSlotView heroSlotView;
         protected int splashStyleCounter = 0;
-        //private Queue<MonsterView> hittingMonsters = new Queue<MonsterView>();
+        
 
         private static readonly int IdleStateName = Animator.StringToHash("idle");
         private static readonly int DieStateName = Animator.StringToHash("die");
@@ -170,12 +170,21 @@ namespace MVC.View
             animator.SetFloat(SpeedParaName, 1);
             boxCollider.enabled = true;
         }
+        public void InitInBattle(HeroSlotView heroSlot)
+        {
+            State = HeroState.Idle;
+            heroSlotView = heroSlot;
+            data = heroSlotView.Data.HeroModel;
+            SetWeapon(data.upgradeLevel);
+            animator.SetFloat(SpeedParaName, 1);
+            boxCollider.enabled = true;
+        }
 
         public void GetDamage(int damage)
         {
             Debug.Log(this.heroSlotView.Data.HeroModel.objectName + " GET DAMAGE " + damage.ToString());
             data.hp -= damage * (1 - data.defense / 100);
-
+            
             if (data.hp <= 0)
             {
                 State = HeroState.Die;
@@ -185,6 +194,10 @@ namespace MVC.View
             }
 
             OnHpChanged?.Invoke();
+            var eventData = new Dictionary<string, object>();
+            eventData.Add(GameConst.AbilityEvent_HeroSlot, heroSlotView);
+            eventData.Add(GameConst.AbilityEvent, data.abilities[0]);
+            ServiceLocator.Instance.GameEventManager.Dispatch(GameEvent.Hurt, eventData);
         }
 
         private IEnumerator ShowDeadAnim()
@@ -197,5 +210,6 @@ namespace MVC.View
         }
 
         
+
     }
 }

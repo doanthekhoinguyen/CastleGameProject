@@ -18,11 +18,7 @@ public class GameConst
    public const float BeHitMonsterDelayTime = 0.5f;
    public const float TotalTimeInPerLevel =  60 * 3; // in second
    
-   public const int MaxRoadLine = 4;
-   public const int TotalMonsterType = 3;
    
-   public const int MinMonsterPerSpawn = 1;
-   public const int MaxMonsterPerSpawn = 1;
    public const float SpawnInitMinTime = 1;
    public const float SpawnInitMaxTime = 2;
    public const float SpawnMinTime = 15;
@@ -54,4 +50,9 @@ public class GameConst
    public const float MonsterRunBaseSpeed = 0.75f;
    public const float MonsterBaseMinAtkFactor = 0.5f;
    public const float MonsterBaseMaxAtkFactor = 1f;
+
+    // ======== Abilities ======
+    public const string AbilityEvent = "AbilityEvent";
+    public const string AbilityEvent_HeroSlot = "AbilityEvent_HeroSlot";
+
 }

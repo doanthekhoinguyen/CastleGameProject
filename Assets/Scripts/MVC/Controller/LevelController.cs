@@ -70,6 +70,11 @@ namespace MVC.Controller
                 Debug.LogError($"Cannot find spawn configuration for level {currentLevel}");
             }
         }
+        public int GetTotalEnemyInCurrentLevel() 
+        {
+            var levelSpawnConfig = FindLevelSpawnConfig(currentLevel);
+            return levelSpawnConfig.enemiesToSpawn.Length;
+        }
 
         // Thêm các phương thức khác như RestartLevel, LoadLevelData, v.v., tùy thuộc vào nhu cầu của game.
     }

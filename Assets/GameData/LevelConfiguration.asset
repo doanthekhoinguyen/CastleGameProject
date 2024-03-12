@@ -19,7 +19,7 @@ MonoBehaviour:
       slotIndex: 0
     - enemyType: 1
       slotIndex: 1
-    - enemyType: 1
+    - enemyType: 2
       slotIndex: 2
     initialCoin: 10
   - levelNumber: 0

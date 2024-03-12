@@ -23,6 +23,7 @@ namespace Castle.CustomUtil
         public HeroSlotView GetTarget(AbilityModel ability, HeroSlotView casterSlot)
         {
             switch (ability.target)
+
             {
                 case AbilityTarget.Self:
                     return casterSlot;
