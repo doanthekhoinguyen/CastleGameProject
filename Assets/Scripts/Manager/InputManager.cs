@@ -50,7 +50,8 @@ public class InputManager : MonoBehaviour
         {
             case GameConst.HeroSlotTag:
                 var view = target.GetComponent<HeroSlotView>();
-                OnHeroSlotClicked?.Invoke(view);
+                if (!view.isFirstSlot)
+                    OnHeroSlotClicked?.Invoke(view);
                 break;
             case GameConst.PlaneTag:
                 OnPlaneClicked?.Invoke();

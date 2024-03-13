@@ -108,43 +108,6 @@ namespace MVC.View
 
         protected virtual void DealDamageToTarget() { }
 
-        //private void TryFightNextMonster()
-        //{
-        //    target = null;
-        //    State = HeroState.Idle;
-        //    nextAttackTime = 0;
-        //    ChangeAnim(State);
-
-        //    if (hittingMonsters.Count == 0) return;
-        //    MonsterView monster;
-        //    bool hasMonster;
-        //    if (IsRangeHero)
-        //    {
-        //        hasMonster = hittingMonsters.TryDequeue(out monster);
-
-        //        if (!hasMonster) return;
-
-        //        while (hasMonster && HasBehindMonster(monster))
-        //        {
-        //            hasMonster = hittingMonsters.TryDequeue(out monster);
-        //        }
-
-        //    }
-        //    else
-        //    {
-        //        hasMonster = hittingMonsters.TryDequeue(out monster);
-        //    }
-
-        //    if (!hasMonster) return;
-
-        //    AttackTarget(monster);
-        //}
-
-        //private bool HasBehindMonster(MonsterView monster)
-        //{
-        //    var offset = 0.65f;
-        //    return monster == null || monster.transform.position.x < transform.position.x - offset;
-        //}
 
         private void ChangeAnim(HeroState heroState)
         {
@@ -184,17 +147,20 @@ namespace MVC.View
         {
             Debug.Log(this.heroSlotView.Data.HeroModel.objectName + " GET DAMAGE " + damage.ToString());
             data.hp -= damage * (1 - data.defense / 100);
-            
+            var eventData = new Dictionary<string, object>();
             if (data.hp <= 0)
             {
                 State = HeroState.Die;
                 target = null;
                 boxCollider.enabled = false;
                 StartCoroutine(ShowDeadAnim());
+                //eventData.Add(GameConst.AbilityEvent_HeroSlot, heroSlotView);
+                //eventData.Add(GameConst.AbilityEvent, data.abilities[0]);
+                //ServiceLocator.Instance.GameEventManager.Dispatch(GameEvent.Faint, eventData);
             }
 
             OnHpChanged?.Invoke();
-            var eventData = new Dictionary<string, object>();
+            //var eventData = new Dictionary<string, object>();
             eventData.Add(GameConst.AbilityEvent_HeroSlot, heroSlotView);
             eventData.Add(GameConst.AbilityEvent, data.abilities[0]);
             ServiceLocator.Instance.GameEventManager.Dispatch(GameEvent.Hurt, eventData);

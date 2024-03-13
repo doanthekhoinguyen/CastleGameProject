@@ -22,9 +22,21 @@ MonoBehaviour:
     - enemyType: 2
       slotIndex: 2
     initialCoin: 10
-  - levelNumber: 0
-    enemiesToSpawn: []
-    initialCoin: 0
-  - levelNumber: 0
-    enemiesToSpawn: []
-    initialCoin: 0
+  - levelNumber: 2
+    enemiesToSpawn:
+    - enemyType: 0
+      slotIndex: 0
+    - enemyType: 2
+      slotIndex: 1
+    - enemyType: 1
+      slotIndex: 2
+    initialCoin: 12
+  - levelNumber: 3
+    enemiesToSpawn:
+    - enemyType: 0
+      slotIndex: 0
+    - enemyType: 4
+      slotIndex: 1
+    - enemyType: 2
+      slotIndex: 2
+    initialCoin: 15

@@ -13,6 +13,7 @@ namespace MVC.View
     public class BattleHUD : MonoBehaviour
     {
         [SerializeField] private TextMeshProUGUI lbCoin;
+        [SerializeField] private TextMeshProUGUI lbLevel;
         [SerializeField] private Animator summonPanelAnimator;
         [SerializeField] private Animator heroPanelAnimator;
 
@@ -40,13 +41,18 @@ namespace MVC.View
         [SerializeField] private TextMeshProUGUI lbDef;
         [SerializeField] private TextMeshProUGUI lbUpgradeCoin;
         [SerializeField] private TextMeshProUGUI lbSellCoin;
+
         [SerializeField] private Image heroPortrait;
         [SerializeField] private Button btnUpgrade;
         [SerializeField] private Button btnEndTurn;
+        [SerializeField] private Button btnNextLevel;
+
         [SerializeField] private CanvasGroup upgradeCanvasGroup;
 
         [SerializeField] private CameraController cameraController;
-        [SerializeField] private Button toggleCameraButton;
+        [SerializeField] private LevelController levelController;
+       
+
 
 
         private BattleController battleController;
@@ -86,6 +92,10 @@ namespace MVC.View
         public void SetBeginLayout(int coin)
         {
             SetCoin(coin);
+        }
+        public void SetLevel(int currentLevel)
+        {
+            lbLevel.text = $"{currentLevel}/10";
         }
 
         public void ShowSummonPanel()
@@ -187,6 +197,18 @@ namespace MVC.View
         {
             SceneManager.LoadScene("Gameplay");
         }
+        public void OnPlayAgainButtonClicked()
+        {
+            battleController.PlayAgainAfterLose();
+            gameLose.SetActive(false);
+        }
+        public void OnNextLevelButtonClicked()
+        {
+            gameWin.SetActive(false);
+            battleController.ResetForNewLevel();
+            
+            
+        }
 
         public void PauseGame()
         {
@@ -194,22 +216,22 @@ namespace MVC.View
             Time.timeScale = hasPaused ? 0 : 1;
             pauseLayer.SetActive(hasPaused);
         }
-        void Start()
-        {
-            if (toggleCameraButton != null)
-            {
-                toggleCameraButton.onClick.AddListener(ToggleCameraView); // Đăng ký sự kiện khi nút được nhấn
-            }
-            btnEndTurn.onClick.AddListener(EndTurn); // Đăng ký sự kiện khi nút được nhấn
-        }
+        //void Start()
+        //{
+        //    if (toggleCameraButton != null)
+        //    {
+        //        toggleCameraButton.onClick.AddListener(ToggleCameraView); // Đăng ký sự kiện khi nút được nhấn
+        //    }
+        //    btnEndTurn.onClick.AddListener(EndTurn); // Đăng ký sự kiện khi nút được nhấn
+        //}
        
-        public void ToggleCameraView()
-        {
-            if (cameraController != null)
-            {
-                cameraController.ToggleCamera(); 
-            }
-        }
+        //public void ToggleCameraView()
+        //{
+        //    if (cameraController != null)
+        //    {
+        //        cameraController.ToggleCamera(); 
+        //    }
+        //}
         public void EndTurn()
         {
             battleController.OnEndTurnButtonClicked(); // Gọi phương thức trong BattleController

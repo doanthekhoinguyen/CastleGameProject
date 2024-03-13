@@ -17,6 +17,8 @@ namespace MVC.View
 
         public HeroSlotModel Data;
         public HeroView heroView;
+        public bool isFirstSlot = false;
+
         public bool IsHero
         {
             get; private set;
@@ -28,6 +30,7 @@ namespace MVC.View
         {
             get { return Data.HeroModel == null; }
         }
+
 
         public void Init(HeroSlotModel heroSlotModel)
         {
@@ -67,11 +70,14 @@ namespace MVC.View
             }
             heroView.Init(this);
         }
-        
+
         public void SetEmpty()
         {
-            GamePool.Instance.Release(heroGameObject);
-            heroGameObject = null;
+            if (heroGameObject != null)
+            {
+                GamePool.Instance.Release(heroGameObject);
+                heroGameObject = null;
+            }
             Data.HeroModel = null;
             heroView = null;
         }
@@ -120,6 +126,7 @@ namespace MVC.View
                 heroView = null;
             }
         }
+        
 
     }
 }
