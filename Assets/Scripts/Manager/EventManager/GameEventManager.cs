@@ -14,7 +14,8 @@ namespace Castle.CustomUtil.EventManager
         //Ability
         Hurt,
         StartOfTurn,
-        Faint
+        Faint,
+        CameraState
     }
 
     /// <summary>

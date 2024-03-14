@@ -74,5 +74,20 @@ namespace Castle.CustomUtil
             }
             return sfxSources[0];
         }
+
+        // call by ServiceLocator.Instance.AudioManager.SetBGMVolume(0->1);
+
+        public void SetBGMVolume(float value)
+        {
+            bgmSource.volume = Mathf.Clamp01(value);
+        }
+
+        public void SetSFXVolume(float value)
+        {
+            for (int i = 0; i < sfxSources.Length; i++)
+            {
+                sfxSources[i].volume = Mathf.Clamp01(value);
+            }
+        }
     }
 }

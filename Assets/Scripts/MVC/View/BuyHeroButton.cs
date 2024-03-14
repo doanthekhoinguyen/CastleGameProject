@@ -28,5 +28,11 @@ namespace MVC.View
             canvasGroup.alpha = isOn ? 1 : 0.3f;
             Button.interactable = isOn;
         }
+
+        public void SetStatus(bool isOn)
+        {
+            canvasGroup.alpha = isOn ? 1 : 0.3f;
+            Button.interactable = isOn;
+        }
     }
 }

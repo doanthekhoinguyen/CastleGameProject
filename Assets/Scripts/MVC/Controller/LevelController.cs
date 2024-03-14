@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using MVC.Controller;
+using MVC.Model;
 
 namespace MVC.Controller
 {
@@ -64,24 +65,24 @@ namespace MVC.Controller
             return currentLevel;
         }
         public void SpawnEnemiesForCurrentLevel()
-        {
-            var levelSpawnConfig = FindLevelSpawnConfig(currentLevel);
-            if (levelSpawnConfig != null)
             {
-                battleController.SpawnEnemies(levelSpawnConfig.enemiesToSpawn);
+                var levelSpawnConfig = FindLevelSpawnConfig(currentLevel);
+                if (levelSpawnConfig != null)
+                {
+                    battleController.SpawnEnemies(levelSpawnConfig.enemiesToSpawn);
+                }
+                else
+                {
+                    Debug.LogError($"Cannot find spawn configuration for level {currentLevel}");
+                }   
             }
-            else
-            {
-                Debug.LogError($"Cannot find spawn configuration for level {currentLevel}");
-            }   
-        }
         public int GetTotalEnemyInCurrentLevel() 
         {
             var levelSpawnConfig = FindLevelSpawnConfig(currentLevel);
             return levelSpawnConfig.enemiesToSpawn.Length;
         }
 
-        // Thêm các phương thức khác như RestartLevel, LoadLevelData, v.v., tùy thuộc vào nhu cầu của game.
+        // Thêm các phương thức khác như RestartLevel, LoadLevelData
     }
 
 }

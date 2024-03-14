@@ -17,9 +17,9 @@ namespace MVC.View
             var meleeHeroView = other.GetComponent<MeleeHeroView>();
 
             var eventData = new Dictionary<string, object>();
-            Debug.Log($"Hero {this.data.name} clash Monster ${other.name} ${other.gameObject.layer}");
+            //Debug.Log($"Hero {this.data.name} clash Monster ${other.name} ${other.gameObject.layer}");
 
-            Debug.Log($"Hero {this.data.name} clash Monster ${meleeHeroView.data.name}");
+            //Debug.Log($"Hero {this.data.name} clash Monster ${meleeHeroView.data.name}");
             eventData.Add(GameConst.HeroEventName, this);
             eventData.Add(GameConst.MonsterEventName, meleeHeroView);
             eventData.Add(GameConst.CombatPhaseEventName, CombatPhase.HeroAttackMonster);
@@ -33,7 +33,7 @@ namespace MVC.View
 
         protected override void DealDamageToTarget()
         {
-            Debug.Log($"{this.data.objectName} DealDamageToTarget {data.attack}");
+            //Debug.Log($"{this.data.objectName} DealDamageToTarget {data.attack}");
             var atkSpeed = data.attackSpeed * GameConst.BaseAttackSpeed;
             var atkStyleIndex = splashStyleCounter % 2;
             var clipDuration = atkAnimationClips[atkStyleIndex].length / atkSpeed;

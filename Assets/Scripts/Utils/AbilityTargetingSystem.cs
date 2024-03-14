@@ -13,15 +13,21 @@ namespace Castle.CustomUtil
 {
     public class AbilityTargetingSystem
     {
-        private List<HeroSlotView> heroSlots; // Danh sách các HeroSlot trong game
+        private List<HeroSlotView> heroSlots;
+        private List<HeroSlotView> enemySlots;
 
-        public AbilityTargetingSystem(List<HeroSlotView> heroSlots)
+        public AbilityTargetingSystem(List<HeroSlotView> heroSlots, List<HeroSlotView> enemySlots)
         {
             this.heroSlots = heroSlots;
+            this.enemySlots = enemySlots;
         }
+
 
         public HeroSlotView GetTarget(AbilityModel ability, HeroSlotView casterSlot)
         {
+            List<HeroSlotView> targetSlots = heroSlots.Contains(casterSlot) ? heroSlots : enemySlots;
+            List<HeroSlotView> oppositeSlots = heroSlots.Contains(casterSlot) ? enemySlots : heroSlots;
+
             switch (ability.target)
 
             {
@@ -29,23 +35,29 @@ namespace Castle.CustomUtil
                     return casterSlot;
 
                 case AbilityTarget.Behind:
-                    // SlotIndex 0 là slot đầu tiên, không có slot nào ở phía trước
-                    int behindIndex = casterSlot.Data.SlotIndex + 1;
-                    if (behindIndex < heroSlots.Count) // Kiểm tra xem có slot nào ở phía trước không
+                    // Tìm target phía sau trong cùng phe
+                    int behindIndex = targetSlots.IndexOf(casterSlot) + 1;
+                    if (behindIndex < targetSlots.Count)
                     {
-                        return heroSlots[behindIndex]; // Slot phía trước
+                        return targetSlots[behindIndex];
                     }
                     break;
 
+
                 case AbilityTarget.Random:
-                    // Trả về một slot ngẫu nhiên, trừ slot hiện tại của caster
-                    List<HeroSlotView> otherSlots = new List<HeroSlotView>(heroSlots);
-                    otherSlots.Remove(casterSlot);
-                    if (otherSlots.Count > 0)
+                    if (oppositeSlots.Count > 0)
                     {
-                        return otherSlots[UnityEngine.Random.Range(0, otherSlots.Count)];
+                        return oppositeSlots[UnityEngine.Random.Range(0, oppositeSlots.Count)];
                     }
                     break;
+                    //// Trả về một slot ngẫu nhiên, trừ slot hiện tại của caster
+                    //List<HeroSlotView> otherSlots = new List<HeroSlotView>(heroSlots);
+                    //otherSlots.Remove(casterSlot);
+                    //if (otherSlots.Count > 0)
+                    //{
+                    //    return otherSlots[UnityEngine.Random.Range(0, otherSlots.Count)];
+                    //}
+                    //break;
                     // Thêm các logic targeting khác nếu cần
             }
 

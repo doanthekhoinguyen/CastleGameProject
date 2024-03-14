@@ -3,6 +3,10 @@ using MVC.Model;
 using UnityEngine;
 using MVC.Controller;
 using System;
+using UnityEngine.UI;
+using TMPro;
+using System.Collections.Generic;
+using Castle.CustomUtil.EventManager;
 
 namespace MVC.View
 {
@@ -10,14 +14,21 @@ namespace MVC.View
     {
         [SerializeField] private GameObject flag;
         [SerializeField] private GameObject heroContainer;
+        [Header("TextInForHero")]
+        [SerializeField] private TextMeshProUGUI hpText;
+        [SerializeField] private TextMeshProUGUI atkText;
         [Header("VFX")]
         [SerializeField] private GameObject vfxUpgrade;
-        public ParticleSystem abilityVFX; 
+        public ParticleSystem abilityVFXStart;
+        public ParticleSystem abilityVFXHurt;
+        public ParticleSystem abilityVFXFaint;
+        public GameObject slotInfo;
+
 
 
         public HeroSlotModel Data;
         public HeroView heroView;
-        public bool isFirstSlot = false;
+        [HideInInspector] public bool isFirstSlot = false;
 
         public bool IsHero
         {
@@ -31,6 +42,15 @@ namespace MVC.View
             get { return Data.HeroModel == null; }
         }
 
+        private void OnEnable()
+        {
+            ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.CameraState, OnCameraChanged);
+        }
+
+        private void OnDisable()
+        {
+            ServiceLocator.Instance.GameEventManager.RemoveListener(GameEvent.CameraState, OnCameraChanged);
+        }
 
         public void Init(HeroSlotModel heroSlotModel)
         {
@@ -40,10 +60,45 @@ namespace MVC.View
         public void SetHero(HeroModel hero, bool isEnemy)
         {
             Data.HeroModel = hero;
+
             MakeHeroModel(isEnemy);
             IsHero = !isEnemy;
         }
-     
+        //public void UpdateHeroStatsUI()
+        //{
+        //    if (Data != null && Data.HeroModel != null && hpText != null && atkText != null)
+        //    {
+        //        hpText.text = $"{Data.HeroModel.hp}";
+        //        atkText.text = $"{Data.HeroModel.attack}";
+        //    }
+        //    else
+        //    {
+        //        Debug.LogWarning("One or more references (Data, hpText, atkText) are null in UpdateHeroStatsUI.");
+        //    }
+        //}
+        public void UpdateHeroStatsUI()
+        {
+            if (Data != null && Data.HeroModel != null)
+            {
+                if (hpText != null && atkText != null)
+                {
+                    hpText.text = $"{Data.HeroModel.hp}";
+                    atkText.text = $"{Data.HeroModel.attack}";
+                }
+            }
+            else
+            {
+                if (hpText != null && atkText != null)
+                {
+                    // Reset về 0 khi không có Hero
+                    hpText.text = "HP: 0";
+                    atkText.text = "ATK: 0";
+                }
+            }
+        }
+
+
+
 
         private void MakeHeroModel(bool isEnemy)
         {
@@ -68,6 +123,7 @@ namespace MVC.View
                 // heroView = heroGameObject.AddComponent<HeroView>();
                 return;
             }
+            UpdateHeroStatsUI();
             heroView.Init(this);
         }
 
@@ -80,6 +136,7 @@ namespace MVC.View
             }
             Data.HeroModel = null;
             heroView = null;
+            UpdateHeroStatsUI();
         }
 
         public void ShowNoneSlot()
@@ -88,11 +145,7 @@ namespace MVC.View
             flag.SetActive(true);
             heroContainer.SetActive(false);
         }
-        public void ShowNoneSlotv2()
-        {
-            Data.HeroSlotState = HeroSlotState.None;
-            heroContainer.SetActive(false);
-        }
+       
 
         public void ShowHero()
         {
@@ -107,15 +160,31 @@ namespace MVC.View
             vfxUpgrade.SetActive(false);
             vfxUpgrade.SetActive(true);
         }
-        public void ActivateAbilityVFX(HeroSlotView heroSlot)
+        public void ActivateAbilityVFXStart(HeroSlotView heroSlot)
         {
-            // Ví dụ: Kích hoạt particle system đã được thêm vào trước đó trong Unity Editor
-            if (heroSlot.abilityVFX != null)
+            
+            if (heroSlot.abilityVFXStart != null)
             {
-                heroSlot.abilityVFX.Play();
+                heroSlot.abilityVFXStart.Play();
             }
         }
-       
+        public void ActivateAbilityVFXHurt(HeroSlotView heroSlot)
+        {
+            
+            if (heroSlot.abilityVFXHurt != null)
+            {
+                heroSlot.abilityVFXHurt.Play();
+            }
+        }
+        public void ActivateAbilityVFXFaint(HeroSlotView heroSlot)
+        {
+            
+            if (heroSlot.abilityVFXFaint != null)
+            {
+                heroSlot.abilityVFXFaint.Play();
+            }
+        }
+
         public void ClearSlot()
         {
             if (heroGameObject != null)
@@ -127,6 +196,11 @@ namespace MVC.View
             }
         }
         
-
+        private void OnCameraChanged(Dictionary<string, object> eventData)
+        {
+            if (slotInfo == null) { return; }
+            bool isMainCamera = (bool) eventData[GameConst.CameraEvent_State] ;
+            slotInfo.SetActive(isMainCamera);
+        }
     }
 }

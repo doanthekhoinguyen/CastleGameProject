@@ -6,6 +6,7 @@ using Castle.CustomUtil;
 using Castle.CustomUtil.EventManager;
 using MVC.Model;
 using MVC.View;
+using UnityEditorInternal;
 using UnityEngine;
 using static UnityEngine.EventSystems.EventTrigger;
 using Random = UnityEngine.Random;
@@ -288,6 +289,8 @@ namespace MVC.Controller
 
         private void OnHeroDie(Dictionary<string, object> eventData)
         {
+            if (battleState == BattleState.End) { return; }
+
             var slotView = eventData[GameConst.HeroDeadEventName] as HeroSlotView;
             if (slotView == null)
             {
@@ -365,7 +368,7 @@ namespace MVC.Controller
             ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.HeroDead, OnHeroDie);
             ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.Hurt, OnHeroHurt); 
             ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.StartOfTurn, OnHeroStartOfTurn);
-
+            ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.Faint, OnHeroFaint);
 
             ServiceLocator.Instance.InputManager.OnHeroSlotClicked += OnHeroSlotClicked;
             ServiceLocator.Instance.InputManager.OnPlaneClicked += OnPlaneClicked;
@@ -379,6 +382,7 @@ namespace MVC.Controller
             ServiceLocator.Instance.GameEventManager.RemoveListener(GameEvent.HeroDead, OnHeroDie);
             ServiceLocator.Instance.GameEventManager.RemoveListener(GameEvent.Hurt, OnHeroHurt);
             ServiceLocator.Instance.GameEventManager.RemoveListener(GameEvent.StartOfTurn, OnHeroStartOfTurn);
+            ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.Faint, OnHeroFaint);
 
 
             ServiceLocator.Instance.InputManager.OnHeroSlotClicked -= OnHeroSlotClicked;
@@ -535,13 +539,33 @@ namespace MVC.Controller
 
         private void OnCombat(Dictionary<string, object> eventData)
         {
+            if (battleState == BattleState.End) { return; }
             if (!ValidateCombatEventData(eventData)) return;
 
             var hero = eventData[GameConst.HeroEventName] as HeroView;
             var monster = eventData[GameConst.MonsterEventName] as HeroView;
 
-            hero.AttackTarget(monster);
-            monster.AttackTarget(hero);
+            var heroSpeed = hero.GetData().attackSpeed;
+            var monsterSpeed = monster.GetData().attackSpeed;
+
+            bool isHeroAtkFirst = true;
+            if (heroSpeed == monsterSpeed)
+            {
+                isHeroAtkFirst = UnityEngine.Random.Range(0, 1) > 0.5f;
+            }else{
+                isHeroAtkFirst = heroSpeed > monsterSpeed;
+            }
+
+            if (isHeroAtkFirst)
+            {
+                hero.AttackTarget(monster);
+                monster.AttackTarget(hero);
+            }
+            else{
+                monster.AttackTarget(hero);
+                hero.AttackTarget(monster);
+            }
+        
 
             //var combatPhase = (CombatPhase)eventData[GameConst.CombatPhaseEventName];
 
@@ -587,8 +611,10 @@ namespace MVC.Controller
         void Start()
         {
             List<HeroSlotView> heroSlotList = new List<HeroSlotView>(heroSlotViews);
-            abilityTargetingSystem = new AbilityTargetingSystem(heroSlotList);
+            List<HeroSlotView> enemySlotList = new List<HeroSlotView>(enemySlotViews);
+            abilityTargetingSystem = new AbilityTargetingSystem(heroSlotList, enemySlotList);
         }
+
         public void CheckAbilityByType(AbilityType abilityType)
         {
             foreach (var heroSlot in heroSlotViews)
@@ -605,12 +631,27 @@ namespace MVC.Controller
                     }
                 }
             }
+            foreach (var enemySlot in enemySlotViews)
+            {
+                if (!enemySlot.IsEmpty) // Kiểm tra nếu slot không trống
+                {
+                    var heroAbilities = enemySlot.Data.HeroModel.abilities;
+                    foreach (var ability in heroAbilities)
+                    {
+                        if (ability.Type == abilityType)
+                        {
+                            OnAbilityTrigger(ability, enemySlot);
+                        }
+                    }
+                }
+            }
         }
         
         public void ApplyEffect(AbilityModel ability, HeroSlotView targetSlot)
         {
             if (targetSlot != null && targetSlot.Data != null && targetSlot.Data.HeroModel != null)
             {
+                Debug.Log($"Áp dụng {ability.Type} lên {targetSlot.Data.HeroModel.objectName}");
                 if (!targetSlot.Data.HeroModel.abilityTriggeredThisTurn)
                 {
                     int level = targetSlot.Data.HeroModel.upgradeLevel;
@@ -622,19 +663,19 @@ namespace MVC.Controller
                             targetSlot.Data.HeroModel.hp += hpChange;
                             targetSlot.Data.HeroModel.attack += atkChange;
                             // Kích hoạt VFX
-                            targetSlot.ActivateAbilityVFX(targetSlot);
+                            targetSlot.ActivateAbilityVFXStart(targetSlot);
                             break;
                         case AbilityType.Hurt:
                             targetSlot.Data.HeroModel.hp += hpChange;
                             targetSlot.Data.HeroModel.attack += atkChange;
                             // Kích hoạt VFX
-                            targetSlot.ActivateAbilityVFX(targetSlot);
+                            targetSlot.ActivateAbilityVFXHurt(targetSlot);
                             break;
                         case AbilityType.Faint:
                             targetSlot.Data.HeroModel.hp += hpChange;
                             targetSlot.Data.HeroModel.attack += atkChange;
                             // Kích hoạt VFX
-                            targetSlot.ActivateAbilityVFX(targetSlot);
+                            targetSlot.ActivateAbilityVFXFaint(targetSlot);
                             break;
                     }
                     targetSlot.Data.HeroModel.abilityTriggeredThisTurn = true;
@@ -644,7 +685,7 @@ namespace MVC.Controller
         }
         public void OnAbilityTrigger(AbilityModel ability, HeroSlotView casterSlot)
         {
-
+            Debug.Log($"Kích hoạt Ability: {ability.Type} từ {casterSlot.Data.HeroModel.objectName}");
             HeroSlotView targetSlot = abilityTargetingSystem.GetTarget(ability, casterSlot);
 
             // Áp dụng effect lên target
@@ -653,11 +694,13 @@ namespace MVC.Controller
                 ApplyEffect(ability, targetSlot);
 
             }
+            targetSlot.UpdateHeroStatsUI();
         }
         private void OnHeroHurt(Dictionary<string, object> eventData)
         {
             var ability = eventData[GameConst.AbilityEvent] as AbilityModel;
             var slot = eventData[GameConst.AbilityEvent_HeroSlot] as HeroSlotView;
+            Debug.Log($"Xử lý Hurt cho {slot.Data.HeroModel.objectName} với Ability {ability.Type}");
 
             OnAbilityTrigger(ability, slot);
         }
@@ -685,16 +728,29 @@ namespace MVC.Controller
                 }
             }
         }
-        
-        
+
+
         #endregion
 
         #region Level
+
+        private void AdjustEnemyBasedOnLevel(HeroModel enemyModel, int level)
+        {
+            int statIncrease = Math.Max(0, (level - 1) * 2);
+
+            enemyModel.hp += statIncrease;
+            enemyModel.attack += statIncrease;
+
+
+            Debug.Log($"Enemy Level: {level}, Adjusted HP: {enemyModel.hp}, Adjusted ATK: {enemyModel.attack}");
+        }
+
         public void SpawnEnemies(LevelConfigModel.EnemySpawn[] enemySpawns)
         {
             foreach (var enemySpawn in enemySpawns)
             {
-                SpawnEnemyAtSlot(enemySpawn.enemyType, enemySpawn.slotIndex);
+                var enemyModel = gameCollectionManager.GetHeroInfo(enemySpawn.enemyType);
+                SpawnEnemyAtSlot(enemySpawn.enemyType, enemySpawn.slotIndex,enemySpawn.level);
             }
         }
 
@@ -707,12 +763,12 @@ namespace MVC.Controller
 
             foreach (var enemySpawn in levelConfig.enemiesToSpawn)
             {
-                SpawnEnemyAtSlot(enemySpawn.enemyType, enemySpawn.slotIndex);
+                SpawnEnemyAtSlot(enemySpawn.enemyType, enemySpawn.slotIndex,enemySpawn.level);
             }
 
         }
 
-        private void SpawnEnemyAtSlot(PoolName enemyType, int slotIndex)
+        private void SpawnEnemyAtSlot(PoolName enemyType, int slotIndex, int level)
         {
              
             if (slotIndex < 0 || slotIndex >= enemySlotViews.Length)
@@ -728,6 +784,8 @@ namespace MVC.Controller
                 Debug.LogError($"Unable to find enemy model of type {enemyType}");
                 return;
             }
+            AdjustEnemyBasedOnLevel(enemyModel, level);
+
 
             // Đặt enemy vào slot.
             enemySlotViews[slotIndex].SetHero(enemyModel, true);
@@ -788,6 +846,14 @@ namespace MVC.Controller
                 slotView.ShowNoneSlot(); 
             }
         }
+        private void ClearAllEnemySlots()
+        {
+            foreach (var slotView in enemySlotViews)
+            {
+                slotView.SetEmpty();
+                slotView.ShowNoneSlot();
+            }
+        }
         #endregion
 
         #region CheckEndGame
@@ -819,7 +885,7 @@ namespace MVC.Controller
         }
         #endregion
 
-        #region GameEvent
+        #region ButtonEndGame
         public void PlayAgainAfterLose()
         {
             // Giảm số lượng trái tim
@@ -831,7 +897,7 @@ namespace MVC.Controller
                 return;
             }
 
-            // Cập nhật UI trái tim (nếu có)
+            
             battleHUD.UpdateHeart(data.Heart);
             data.CurrentLevel = levelController.GetCurrentLevel();
             battleHUD.SetLevel(data.CurrentLevel);
@@ -845,6 +911,7 @@ namespace MVC.Controller
             remainHero = 0;
             remainEnemy = 0;    
             ClearAllHeroSlots();
+            ClearAllEnemySlots();
 
             BattleState = BattleState.Prepare;
 

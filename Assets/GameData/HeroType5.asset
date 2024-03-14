@@ -21,10 +21,10 @@ MonoBehaviour:
   attackType: 0
   abilityTriggeredThisTurn: 0
   abilities:
-  - Type: 0
+  - Type: 2
     target: 1
     effect: 0
-    hpChange: 1
+    hpChange: 10
     atkChange: 0
     description: 
   fullPortraitPath: HeroType5-full

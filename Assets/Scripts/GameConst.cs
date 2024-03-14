@@ -55,4 +55,6 @@ public class GameConst
     public const string AbilityEvent = "AbilityEvent";
     public const string AbilityEvent_HeroSlot = "AbilityEvent_HeroSlot";
 
+    public const string CameraEvent = "CameraEvent";
+    public const string CameraEvent_State = "CameraEvent_State";
 }

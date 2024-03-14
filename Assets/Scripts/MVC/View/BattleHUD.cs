@@ -50,6 +50,7 @@ namespace MVC.View
         [SerializeField] private CanvasGroup upgradeCanvasGroup;
 
         [SerializeField] private CameraController cameraController;
+        [SerializeField] private Button toggleCameraButton;
         [SerializeField] private LevelController levelController;
        
 
@@ -72,11 +73,18 @@ namespace MVC.View
 
             gameAsset = ServiceLocator.Instance.GameAssetManager;
 
+            //for (int i = 0; i < heroesContainer.childCount; i++)
+            //{
+            //    var obj = heroesContainer.GetChild(i);
+            //    DestroyImmediate(obj);
+            //}
+
             for (int i = 0; i < purchasableHeroes.Count; i++)
             {
                 GameObject go = Instantiate(buyHeroButtonPrefab, heroesContainer);
                 var ctrl = go.GetComponent<BuyHeroButton>();
                 ctrl.SetData(purchasableHeroes[i]);
+                //ctrl.SetStatus();
                 var i1 = i;
                 ctrl.Button.onClick.AddListener(() => OnSummonHero(purchasableHeroes[i1].id));
                 purchasableHeroButtons.Add(ctrl);
@@ -216,22 +224,22 @@ namespace MVC.View
             Time.timeScale = hasPaused ? 0 : 1;
             pauseLayer.SetActive(hasPaused);
         }
-        //void Start()
-        //{
-        //    if (toggleCameraButton != null)
-        //    {
-        //        toggleCameraButton.onClick.AddListener(ToggleCameraView); // Đăng ký sự kiện khi nút được nhấn
-        //    }
-        //    btnEndTurn.onClick.AddListener(EndTurn); // Đăng ký sự kiện khi nút được nhấn
-        //}
-       
-        //public void ToggleCameraView()
-        //{
-        //    if (cameraController != null)
-        //    {
-        //        cameraController.ToggleCamera(); 
-        //    }
-        //}
+        void Start()
+        {
+            btnEndTurn.onClick.AddListener(EndTurn); // Đăng ký sự kiện khi nút được nhấn
+        }
+
+        public void ToggleCameraView()
+        {
+            if (cameraController != null)
+                Debug.Log("Camera is clicked");
+            {
+                cameraController.ToggleCamera();
+                var eventData = new Dictionary<string, object>();
+                eventData.Add(GameConst.CameraEvent_State, cameraController.IsUsingMainCamera);
+                ServiceLocator.Instance.GameEventManager.Dispatch(GameEvent.CameraState, eventData);
+            }
+        }
         public void EndTurn()
         {
             battleController.OnEndTurnButtonClicked(); // Gọi phương thức trong BattleController

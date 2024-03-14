@@ -57,6 +57,7 @@ namespace MVC.View
             nextAttackTime = 0;
             target = targetView;
             State = HeroState.Attack;
+            splashStyleCounter = UnityEngine.Random.Range(0, 2);
         }
 
         public void SetWeapon(int level)
@@ -129,24 +130,21 @@ namespace MVC.View
             State = HeroState.Idle;
             heroSlotView = heroSlot;
             data = heroSlotView.Data.HeroModel;
+            
             SetWeapon(data.upgradeLevel);
-            animator.SetFloat(SpeedParaName, 1);
+            animator.SetFloat(SpeedParaName, 1);OnHpChanged += heroSlot.UpdateHeroStatsUI;
             boxCollider.enabled = true;
         }
-        public void InitInBattle(HeroSlotView heroSlot)
-        {
-            State = HeroState.Idle;
-            heroSlotView = heroSlot;
-            data = heroSlotView.Data.HeroModel;
-            SetWeapon(data.upgradeLevel);
-            animator.SetFloat(SpeedParaName, 1);
-            boxCollider.enabled = true;
-        }
+        
+        public HeroModel GetData() { return data; }
 
         public void GetDamage(int damage)
         {
-            Debug.Log(this.heroSlotView.Data.HeroModel.objectName + " GET DAMAGE " + damage.ToString());
-            data.hp -= damage * (1 - data.defense / 100);
+         
+
+            //Debug.Log(this.heroSlotView.Data.HeroModel.objectName + " GET DAMAGE " + damage.ToString());
+            data.hp = Math.Max(0, data.hp - damage * (1 - data.defense / 100));
+            
             var eventData = new Dictionary<string, object>();
             if (data.hp <= 0)
             {
@@ -154,9 +152,7 @@ namespace MVC.View
                 target = null;
                 boxCollider.enabled = false;
                 StartCoroutine(ShowDeadAnim());
-                //eventData.Add(GameConst.AbilityEvent_HeroSlot, heroSlotView);
-                //eventData.Add(GameConst.AbilityEvent, data.abilities[0]);
-                //ServiceLocator.Instance.GameEventManager.Dispatch(GameEvent.Faint, eventData);
+                
             }
 
             OnHpChanged?.Invoke();
@@ -164,18 +160,38 @@ namespace MVC.View
             eventData.Add(GameConst.AbilityEvent_HeroSlot, heroSlotView);
             eventData.Add(GameConst.AbilityEvent, data.abilities[0]);
             ServiceLocator.Instance.GameEventManager.Dispatch(GameEvent.Hurt, eventData);
+
         }
 
         private IEnumerator ShowDeadAnim()
         {
             ChangeAnim(State);
             yield return new WaitForSeconds(2f);
-            var eventData = new Dictionary<string, object>();
-            eventData.Add(GameConst.HeroDeadEventName, heroSlotView);
+
+            // Kiểm tra và kích hoạt ability Faint
+            foreach (var ability in data.abilities)
+            {
+                if (ability.Type == AbilityType.Faint)
+                {
+                    var abilityEventData = new Dictionary<string, object>
+            {
+                { GameConst.AbilityEvent, ability },
+                { GameConst.AbilityEvent_HeroSlot, heroSlotView }
+            };
+                    ServiceLocator.Instance.GameEventManager.Dispatch(GameEvent.Faint, abilityEventData);
+                }
+            }
+
+            // Dispatch sự kiện HeroDead sau khi đã xử lý ability Faint
+            var eventData = new Dictionary<string, object>
+    {
+        { GameConst.HeroDeadEventName, heroSlotView }
+    };
             ServiceLocator.Instance.GameEventManager.Dispatch(GameEvent.HeroDead, eventData);
         }
 
-        
+
+
 
     }
 }

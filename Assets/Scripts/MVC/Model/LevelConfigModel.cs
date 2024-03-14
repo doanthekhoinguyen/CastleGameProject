@@ -12,7 +12,8 @@ public class LevelConfigModel : ScriptableObject
     public class EnemySpawn
     {
         public PoolName enemyType; 
-        public int slotIndex; 
+        public int slotIndex;
+        public int level;
     }
 
     [System.Serializable]
