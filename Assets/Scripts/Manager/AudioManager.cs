@@ -14,30 +14,34 @@ namespace Castle.CustomUtil
         [SerializeField] private AudioSource bgmSource;
         [SerializeField] private AudioSource[] sfxSources;
         [SerializeField] private AudioClip[] audioLib;
-        
+
         [SerializeField] private AudioClip[] audioPenalty;
+
+       
+
 
         private bool canPlayPenaltySfx = true;
 
+        
         public void PlayBgm(bool isPlay = true)
         {
             if (isPlay)
             {
                 bgmSource.Play();
-            } 
+            }
             else
             {
                 bgmSource.Stop();
             }
         }
-        
+
         public void PlaySfx(SFX clipName)
         {
             var source = GetSfxSource();
-            source.clip = audioLib[(int) clipName];
+            source.clip = audioLib[(int)clipName];
             source.Play();
         }
-        
+
         public void PlaySfx(AudioClip clip)
         {
             var source = GetSfxSource();
@@ -77,17 +81,21 @@ namespace Castle.CustomUtil
 
         // call by ServiceLocator.Instance.AudioManager.SetBGMVolume(0->1);
 
-        public void SetBGMVolume(float value)
-        {
-            bgmSource.volume = Mathf.Clamp01(value);
-        }
-
-        public void SetSFXVolume(float value)
-        {
-            for (int i = 0; i < sfxSources.Length; i++)
+           public void SetBGMVolume(float value)
             {
-                sfxSources[i].volume = Mathf.Clamp01(value);
+                Debug.Log($"Setting BGM volume to: {value}");
+                bgmSource.volume = Mathf.Clamp01(value);
             }
-        }
+
+            public void SetSFXVolume(float value)
+            {
+                Debug.Log($"Setting SFX volume to: {value}");
+                for (int i = 0; i < sfxSources.Length; i++)
+                {
+                    sfxSources[i].volume = Mathf.Clamp01(value);
+                }
+            }
+        
+        
     }
 }

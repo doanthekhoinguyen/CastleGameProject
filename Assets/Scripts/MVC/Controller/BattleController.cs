@@ -56,7 +56,7 @@ namespace MVC.Controller
         private int remainHero;
         private int remainEnemy;
         private AbilityTargetingSystem abilityTargetingSystem;
-
+        public static event Action OnBattleEnd;
 
         public void Init(BattleModel battleData)
         {
