@@ -30,6 +30,9 @@ namespace MVC.View
         [Header("Game Lose")]
         [SerializeField] private GameObject gameLose;
 
+        [Header("Game Draw")]
+        [SerializeField] private GameObject gameDraw;
+
         [Header("Tavern Panel")]
         [SerializeField] private GameObject buyHeroButtonPrefab;
         [SerializeField] private Transform heroesContainer;
@@ -163,6 +166,14 @@ namespace MVC.View
             heroPanelAnimator.SetTrigger(AnimHideImmediate);
             summonPanelAnimator.SetTrigger(AnimHideImmediate);
         }
+        public void HideBattleButton() 
+        {
+            btnEndTurn.gameObject.SetActive(false);
+        }
+        public void ShowBattleButton()
+        {
+            btnEndTurn.gameObject.SetActive(true);
+        }
 
         public void ShowHeroInfoPanel(HeroModel hero)
         {
@@ -180,6 +191,11 @@ namespace MVC.View
         {
             gameLose.SetActive(true);
         }
+        public void ShowGameDraw()
+        {
+            gameDraw.SetActive(true);
+        }
+
 
         private void OnSummonHero(PoolName poolName)
         {
@@ -210,6 +226,12 @@ namespace MVC.View
             battleController.PlayAgainAfterLose();
             gameLose.SetActive(false);
         }
+        public void OnPlayAgainButtonInDrawClicked()
+        {
+            battleController.PlayAgainAfterDraw();
+            gameDraw.SetActive(false);
+        }
+
         public void OnNextLevelButtonClicked()
         {
             gameWin.SetActive(false);

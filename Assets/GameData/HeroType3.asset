@@ -14,21 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 2
   objectName: Knight
-  hp: 5
-  attack: 4
+  hp: 9
+  attack: 3
   defense: 0
-  attackSpeed: 2
+  attackSpeed: 1
   attackType: 0
   abilityTriggeredThisTurn: 0
   abilities:
-  - Type: 0
-    target: 0
+  - Type: 2
+    target: 1
     effect: 0
-    hpChange: 0
+    hpChange: 2
     atkChange: 0
-    description: 
+    description: Faint-> Give 2 HP to behind
   fullPortraitPath: HeroType3-full
   miniPortraitPath: HeroType3-mini
-  coin: 4
+  coin: 20
+  unlockLevel: 3
   upgradeLevel: 1
   maxUpgradeLevel: 3

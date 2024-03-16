@@ -19,7 +19,7 @@ public class BattleScene : MonoBehaviour
         
         battleController.Init(new BattleModel()
         {
-            InitCoin = 10,
+            InitCoin = 25,
             Heart = 5
         });
     }

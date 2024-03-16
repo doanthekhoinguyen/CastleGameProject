@@ -14,21 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 3
   objectName: Peter
-  hp: 3
-  attack: 3
+  hp: 11
+  attack: 4
   defense: 0
   attackSpeed: 1
   attackType: 0
   abilityTriggeredThisTurn: 0
   abilities:
-  - Type: 1
-    target: 0
+  - Type: 0
+    target: 3
     effect: 0
-    hpChange: 10
-    atkChange: 0
-    description: 
+    hpChange: 2
+    atkChange: 2
+    description: Start Of Battle ->Give 1 RanDom Friends 2 ATK + 2 HP
   fullPortraitPath: HeroType4-full
   miniPortraitPath: HeroType4-mini
-  coin: 3
+  coin: 25
+  unlockLevel: 3
   upgradeLevel: 1
   maxUpgradeLevel: 3

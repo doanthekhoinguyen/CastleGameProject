@@ -51,4 +51,5 @@ MonoBehaviour:
   - {fileID: 11400000, guid: eb7a607ed2cc6914c82a8ff028396506, type: 2}
   - {fileID: 11400000, guid: 8f00062b1b3071c47af0fc6421b6d192, type: 2}
   - {fileID: 11400000, guid: d65ac32716fba5b41bc5a01c414f731f, type: 2}
+  - {fileID: 11400000, guid: 3204bb5a887c2f64083eff5e9634e7f5, type: 2}
   tavern: {fileID: 11400000, guid: 0c89c6ab689726641b1ea9dfaf5176f1, type: 2}

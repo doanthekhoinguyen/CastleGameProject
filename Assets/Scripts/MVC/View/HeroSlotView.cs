@@ -64,18 +64,7 @@ namespace MVC.View
             MakeHeroModel(isEnemy);
             IsHero = !isEnemy;
         }
-        //public void UpdateHeroStatsUI()
-        //{
-        //    if (Data != null && Data.HeroModel != null && hpText != null && atkText != null)
-        //    {
-        //        hpText.text = $"{Data.HeroModel.hp}";
-        //        atkText.text = $"{Data.HeroModel.attack}";
-        //    }
-        //    else
-        //    {
-        //        Debug.LogWarning("One or more references (Data, hpText, atkText) are null in UpdateHeroStatsUI.");
-        //    }
-        //}
+        
         public void UpdateHeroStatsUI()
         {
             if (Data != null && Data.HeroModel != null)

@@ -14,21 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 1
   objectName: Magician
-  hp: 3
-  attack: 1
-  defense: 5
+  hp: 7
+  attack: 2
+  defense: 0
   attackSpeed: 1
   attackType: 0
   abilityTriggeredThisTurn: 0
   abilities:
   - Type: 1
-    target: 1
+    target: 0
     effect: 0
     hpChange: 0
-    atkChange: 5
-    description: 
+    atkChange: 2
+    description: Hurt->Give 2 ATK to Self
   fullPortraitPath: HeroType2-full
   miniPortraitPath: HeroType2-mini
-  coin: 3
+  coin: 15
+  unlockLevel: 1
   upgradeLevel: 1
   maxUpgradeLevel: 3

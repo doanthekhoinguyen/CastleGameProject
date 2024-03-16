@@ -15,6 +15,7 @@ namespace Castle.CustomUtil.EventManager
         Hurt,
         StartOfTurn,
         Faint,
+        //Camera
         CameraState
     }
 

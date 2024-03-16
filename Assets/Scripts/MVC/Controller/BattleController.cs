@@ -32,7 +32,7 @@ namespace MVC.Controller
         [SerializeField] private HeroSlotView[] enemySlotViews;
         [SerializeField] private LevelController levelController;
 
-   
+
         public int Coin { get; private set; }
 
         private GameCollectionManager gameCollectionManager;
@@ -51,24 +51,24 @@ namespace MVC.Controller
         private BattleState battleState;
         private BattleModel data;
         private HeroSlotView curHeroSlotView;
-        //private float battleTimer;
         private int heart;
         private int remainHero;
         private int remainEnemy;
         private AbilityTargetingSystem abilityTargetingSystem;
-        public static event Action OnBattleEnd;
+
 
         public void Init(BattleModel battleData)
         {
 
             data = battleData;
+
+
             if (data.CurrentLevel == 0)
             {
                 data.CurrentLevel = 1;
             }
             BattleState = BattleState.Prepare;
             gameCollectionManager = ServiceLocator.Instance.GameCollectionManager;
-            //battleTimer = GameConst.TotalTimeInPerLevel;
             heart = battleData.Heart;
 
             battleHUD.SetUpHeart(heart);
@@ -91,7 +91,6 @@ namespace MVC.Controller
         private void Update()
         {
             ProcessGameLoop();
-            //UpdateLevelProgress();
         }
         #endregion
 
@@ -130,7 +129,7 @@ namespace MVC.Controller
             battleHUD.SetLevel(data.CurrentLevel);
             remainHero = 0;
             remainEnemy = 0;
-            ClearAllHeroSlots();           
+            ClearAllHeroSlots();
             BattleState = BattleState.Prepare;
 
             //StartCoroutine(PrepareBattle());
@@ -141,11 +140,9 @@ namespace MVC.Controller
             ServiceLocator.Instance.InputManager.SetCamera(battleCamera);
             ServiceLocator.Instance.InputManager.HasBlockInput = true;
 
-            var heroes = gameCollectionManager.GetTavernHeroes();
+            var heroes = gameCollectionManager.GetTavernHeroes(data.CurrentLevel);
             battleHUD.Init(this, heroes);
             battleHUD.SetBeginLayout(data.InitCoin);
-
-            
 
             // fill data
             Coin = data.InitCoin;
@@ -156,39 +153,38 @@ namespace MVC.Controller
             // animate
             yield return ShowBattleSlotAnim();
             yield return new WaitForSeconds(1);
-            
+
             ServiceLocator.Instance.InputManager.HasBlockInput = false;
 
 
         }
         public void OnEndTurnButtonClicked()
         {
-            //ServiceLocator.Instance.InputManager.HasBlockInput = true;
+            if (!IsPlayerReady())
+            {
+                Debug.Log("Cannot end turn. Please setup at least one hero.");
+                return; 
+            }
+
             MoveTeam();
 
             ResetAbility();
             BattleState = BattleState.Start;
 
-            levelController.SpawnEnemiesForCurrentLevel();
-            remainEnemy = levelController.GetTotalEnemyInCurrentLevel();
-            remainHero = GetTotalHeroInCurrentLevel();
-
         }
-        
-
-
 
         private void StartBattle()
         {
-            //ServiceLocator.Instance.InputManager.HasBlockInput = false;
-
+            battleHUD.HideBattleButton();
             //Spawn Enemy 
-
+            levelController.SpawnEnemiesForCurrentLevel();
+            remainEnemy = levelController.GetTotalEnemyInCurrentLevel();
+            remainHero = GetTotalHeroInCurrentLevel();
             // Start of turn ability 
             CheckAbilityByType(AbilityType.StartOfTurn);
-            
+
             BattleState = BattleState.BeOngoing;
-           
+
             ServiceLocator.Instance.AudioManager.PlayBgm();
         }
 
@@ -197,69 +193,47 @@ namespace MVC.Controller
 
         }
 
-       
-
         private void ProcessBattle()
         {
-           
-            //monsterSpawner.Update();
-            //if (battleTimer <= 0 && monsterSpawner.HasNoMonsterOnMap()) BattleState = BattleState.End;]
-
-            // Hurt & Faint Ability heare
+            ServiceLocator.Instance.InputManager.HasBlockInput = true;
         }
 
         private void EndBattle()
         {
             ServiceLocator.Instance.AudioManager.PlayBgm(false);
 
-            if (IsOutOfHero())
+            StartCoroutine(EndGameCheckRoutine());
+            battleHUD.ShowBattleButton();
+        }
+        private IEnumerator EndGameCheckRoutine()
+        {
+            yield return new WaitForSeconds(1.5f); // Chờ đợi để tất cả animations hoàn thành
+
+            // Kiểm tra trường hợp hòa
+            if (IsOutOfHero() && IsOutOfEnemy())
             {
+                // Xử lý trường hợp hòa
+                battleHUD.ShowGameDraw();
+                Debug.Log("show game draw");
+                ServiceLocator.Instance.AudioManager.PlaySfx(SFX.GameLose);
+            }
+            else if (IsOutOfHero())
+            {
+                // Thua
                 battleHUD.ShowGameLose();
                 ServiceLocator.Instance.AudioManager.PlaySfx(SFX.GameLose);
             }
-            else
+            else if (IsOutOfEnemy())
             {
+                // Thắng
                 battleHUD.ShowGameWin();
+                Debug.Log("show game win");
                 ServiceLocator.Instance.AudioManager.PlaySfx(SFX.GameWin);
             }
 
             BattleState = BattleState.ChangingState;
         }
 
-        #endregion
-
-        #region Battle Logic
-
-        //private void UpdateLevelProgress()
-        //{
-        //    if (BattleState != BattleState.BeOngoing) return;
-
-        //    battleTimer -= Time.deltaTime;
-
-        //    if (battleTimer <= 0)
-        //    {
-        //        battleTimer = 0;
-        //        monsterSpawner.Stop();
-        //        return;
-        //    }
-        //    monsterSpawner.SetLevelProgress(1 - battleTimer / GameConst.TotalTimeInPerLevel);
-        //}
-
-        //private void OnMonsterEnterCastle(Dictionary<string, object> obj)
-        //{
-        //    if (BattleState != BattleState.BeOngoing) return;
-
-        //    heart = Mathf.Max(heart - 1, 0);
-        //    battleHUD.UpdateHeart(heart);
-        //    monsterSpawner.ReduceMonsterCounter();
-        //    if (heart == 0)
-        //    {
-        //        BattleState = BattleState.End;
-        //        return;
-        //    }
-
-        //    ServiceLocator.Instance.AudioManager.PlayPenaltySfx();
-        //}
 
         #endregion
 
@@ -272,24 +246,32 @@ namespace MVC.Controller
             curHeroSlotView.Data.HeroModel.upgradeLevel = Mathf.Clamp(curHeroSlotView.Data.HeroModel.upgradeLevel + 1,
                 1, curHeroSlotView.Data.HeroModel.maxUpgradeLevel);
 
-            var originHeroInfo = gameCollectionManager.GetHeroInfo(curHeroSlotView.Data.HeroModel.id);
-            var atkBonus = Random.Range(GameConst.HeroAtkBonusPerLevel[0], GameConst.HeroAtkBonusPerLevel[1]);
-            var defBonus = Random.Range(GameConst.HeroDefBonusPerLevel[0], GameConst.HeroDefBonusPerLevel[1]);
-            var hpBonus = Random.Range(GameConst.HeroHpBonusPerLevel[0], GameConst.HeroHpBonusPerLevel[1]);
-            var atkSpeedBonus = Random.Range(GameConst.HeroAtkSpeedBonusPerLevel[0], GameConst.HeroAtkSpeedBonusPerLevel[1]);
+            //var originHeroInfo = gameCollectionManager.GetHeroInfo(curHeroSlotView.Data.HeroModel.id);
+            //var atkBonus = Random.Range(GameConst.HeroAtkBonusPerLevel[0], GameConst.HeroAtkBonusPerLevel[1]);
+            //var defBonus = Random.Range(GameConst.HeroDefBonusPerLevel[0], GameConst.HeroDefBonusPerLevel[1]);
+            //var hpBonus = Random.Range(GameConst.HeroHpBonusPerLevel[0], GameConst.HeroHpBonusPerLevel[1]);
+            //var atkSpeedBonus = Random.Range(GameConst.HeroAtkSpeedBonusPerLevel[0], GameConst.HeroAtkSpeedBonusPerLevel[1]);
 
-            curHeroSlotView.Data.HeroModel.attack = Mathf.FloorToInt(curHeroSlotView.Data.HeroModel.attack * atkBonus);
-            curHeroSlotView.Data.HeroModel.defense = Mathf.FloorToInt(curHeroSlotView.Data.HeroModel.defense * defBonus);
-            curHeroSlotView.Data.HeroModel.hp = Mathf.FloorToInt(originHeroInfo.hp * hpBonus * curHeroSlotView.Data.HeroModel.upgradeLevel);
-            curHeroSlotView.Data.HeroModel.attackSpeed = curHeroSlotView.Data.HeroModel.attackSpeed * atkSpeedBonus;
+            //curHeroSlotView.Data.HeroModel.attack = Mathf.FloorToInt(curHeroSlotView.Data.HeroModel.attack * atkBonus);
+            //curHeroSlotView.Data.HeroModel.defense = Mathf.FloorToInt(curHeroSlotView.Data.HeroModel.defense * defBonus);
+            //curHeroSlotView.Data.HeroModel.hp = Mathf.FloorToInt(originHeroInfo.hp * hpBonus * curHeroSlotView.Data.HeroModel.upgradeLevel);
+            //curHeroSlotView.Data.HeroModel.attackSpeed = curHeroSlotView.Data.HeroModel.attackSpeed * atkSpeedBonus;
+            int upgradeLevel = curHeroSlotView.Data.HeroModel.upgradeLevel;
+            int increaseAmount = Math.Max(0, (upgradeLevel - 1) * 2);
+            curHeroSlotView.Data.HeroModel.attack += increaseAmount;
+            curHeroSlotView.Data.HeroModel.hp += increaseAmount;
+            curHeroSlotView.Data.HeroModel.attackSpeed += increaseAmount / 10;
+
             curHeroSlotView.ShowUpgrade();
+            curHeroSlotView.UpdateHeroStatsUI();
             battleHUD.ShowHeroInfoPanel(curHeroSlotView.Data.HeroModel);
+            
         }
 
 
         private void OnHeroDie(Dictionary<string, object> eventData)
         {
-            if (battleState == BattleState.End) { return; }
+            //if (battleState == BattleState.End) { return; }
 
             var slotView = eventData[GameConst.HeroDeadEventName] as HeroSlotView;
             if (slotView == null)
@@ -307,10 +289,10 @@ namespace MVC.Controller
             {
                 remainEnemy--;
             }
-            
+
             bool isPlayerSide = heroSlotViews.Contains(slotView);
 
-           
+
             int deadHeroSlotIndex = isPlayerSide ? Array.IndexOf(heroSlotViews, slotView) : Array.IndexOf(enemySlotViews, slotView);
 
             slotView.SetEmpty();
@@ -322,7 +304,7 @@ namespace MVC.Controller
                 return;
             }
 
-            
+
             CompactHeroesAfterDeath(isPlayerSide, deadHeroSlotIndex);
             Debug.Log($"hero {remainHero} enemy {remainEnemy}");
             if (IsEndGame())
@@ -341,23 +323,6 @@ namespace MVC.Controller
         }
         #endregion
 
-        #region Monster Event
-
-
-        //private void OnMonsterDie(Dictionary<string, object> eventData)
-        //{
-        //    var monster = eventData[GameConst.MonsterDeadEventName] as MonsterModel;
-        //    if (monster == null)
-        //    {
-        //        Debug.LogError("Not found monster in MonsterDead Event");
-        //        return;
-        //    }
-        //    ServiceLocator.Instance.AudioManager.PlayCoinSfx();
-        //    AddCoin(monster.CoinReward);
-        //    monsterSpawner.ReduceMonsterCounter();
-        //}
-        #endregion
-
         #region Input event
 
         private void RegisterEvent()
@@ -366,7 +331,7 @@ namespace MVC.Controller
             ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.UpgradeHero, OnHeroUpgrade);
             ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.Combat, OnCombat);
             ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.HeroDead, OnHeroDie);
-            ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.Hurt, OnHeroHurt); 
+            ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.Hurt, OnHeroHurt);
             ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.StartOfTurn, OnHeroStartOfTurn);
             ServiceLocator.Instance.GameEventManager.AddListener(GameEvent.Faint, OnHeroFaint);
 
@@ -396,7 +361,7 @@ namespace MVC.Controller
 
         private void OnHeroSlotClicked(HeroSlotView heroSlotView)
         {
-            
+
 
             curHeroSlotView = heroSlotView;
 
@@ -460,26 +425,37 @@ namespace MVC.Controller
             }
         }
 
+        private bool IsPlayerReady()
+        {
+            foreach (var slot in heroSlotViews)
+            {
+                if (!slot.IsEmpty)
+                {
+                    return true;
+                }
+            }
+            return false;
 
+        }
         public void MoveTeam()
         {
-            bool hasMoved = true; 
-            while (hasMoved) 
+            bool hasMoved = true;
+            while (hasMoved)
             {
-                hasMoved = false; 
+                hasMoved = false;
                 for (int i = 0; i < heroSlotViews.Length - 1; i++)
                 {
-                    
+
                     if (heroSlotViews[i].IsEmpty && !heroSlotViews[i + 1].IsEmpty)
                     {
-                        
+
                         heroSlotViews[i].SetHero(heroSlotViews[i + 1].Data.HeroModel, false);
                         heroSlotViews[i + 1].SetEmpty();
 
                         heroSlotViews[i].ShowHero();
                         heroSlotViews[i + 1].ShowNoneSlot();
 
-                        hasMoved = true; 
+                        hasMoved = true;
                     }
                 }
             }
@@ -552,7 +528,9 @@ namespace MVC.Controller
             if (heroSpeed == monsterSpeed)
             {
                 isHeroAtkFirst = UnityEngine.Random.Range(0, 1) > 0.5f;
-            }else{
+            }
+            else
+            {
                 isHeroAtkFirst = heroSpeed > monsterSpeed;
             }
 
@@ -561,23 +539,12 @@ namespace MVC.Controller
                 hero.AttackTarget(monster);
                 monster.AttackTarget(hero);
             }
-            else{
+            else
+            {
                 monster.AttackTarget(hero);
                 hero.AttackTarget(monster);
             }
-        
 
-            //var combatPhase = (CombatPhase)eventData[GameConst.CombatPhaseEventName];
-
-            //switch (combatPhase)
-            //{
-            //    case CombatPhase.HeroAttackMonster:
-            //        hero.AttackTarget(monster);
-            //        break;
-            //    case CombatPhase.MonsterAttackHero:
-            //        monster.AttackTarget(hero);
-            //        break;
-            //}
         }
 
         private bool ValidateCombatEventData(Dictionary<string, object> eventData)
@@ -589,12 +556,6 @@ namespace MVC.Controller
                 return false;
             }
 
-            //var monster = eventData[GameConst.MonsterEventName] as MonsterView;
-            //if (monster == null)
-            //{
-            //    Debug.LogError("Not found monster in OnMeleeCombat event");
-            //    return false;
-            //}
 
             var hasCombatPhase = eventData.ContainsKey(GameConst.CombatPhaseEventName);
             if (!hasCombatPhase)
@@ -646,7 +607,7 @@ namespace MVC.Controller
                 }
             }
         }
-        
+
         public void ApplyEffect(AbilityModel ability, HeroSlotView targetSlot)
         {
             if (targetSlot != null && targetSlot.Data != null && targetSlot.Data.HeroModel != null)
@@ -655,8 +616,8 @@ namespace MVC.Controller
                 if (!targetSlot.Data.HeroModel.abilityTriggeredThisTurn)
                 {
                     int level = targetSlot.Data.HeroModel.upgradeLevel;
-                    int hpChange = ability.hpChange * level;
-                    int atkChange = ability.atkChange * level;
+                    int hpChange = ability.hpChange + level;
+                    int atkChange = ability.atkChange + level;
                     switch (ability.Type)
                     {
                         case AbilityType.StartOfTurn:
@@ -740,6 +701,7 @@ namespace MVC.Controller
 
             enemyModel.hp += statIncrease;
             enemyModel.attack += statIncrease;
+            enemyModel.attackSpeed += statIncrease / 10;
 
 
             Debug.Log($"Enemy Level: {level}, Adjusted HP: {enemyModel.hp}, Adjusted ATK: {enemyModel.attack}");
@@ -750,7 +712,7 @@ namespace MVC.Controller
             foreach (var enemySpawn in enemySpawns)
             {
                 var enemyModel = gameCollectionManager.GetHeroInfo(enemySpawn.enemyType);
-                SpawnEnemyAtSlot(enemySpawn.enemyType, enemySpawn.slotIndex,enemySpawn.level);
+                SpawnEnemyAtSlot(enemySpawn.enemyType, enemySpawn.slotIndex, enemySpawn.level);
             }
         }
 
@@ -763,14 +725,14 @@ namespace MVC.Controller
 
             foreach (var enemySpawn in levelConfig.enemiesToSpawn)
             {
-                SpawnEnemyAtSlot(enemySpawn.enemyType, enemySpawn.slotIndex,enemySpawn.level);
+                SpawnEnemyAtSlot(enemySpawn.enemyType, enemySpawn.slotIndex, enemySpawn.level);
             }
 
         }
 
         private void SpawnEnemyAtSlot(PoolName enemyType, int slotIndex, int level)
         {
-             
+
             if (slotIndex < 0 || slotIndex >= enemySlotViews.Length)
             {
                 Debug.LogError("Slot index is out of range.");
@@ -790,8 +752,8 @@ namespace MVC.Controller
             // Đặt enemy vào slot.
             enemySlotViews[slotIndex].SetHero(enemyModel, true);
             enemySlotViews[slotIndex].ShowHero();
-            
-        
+
+
 
         }
         #endregion
@@ -815,10 +777,6 @@ namespace MVC.Controller
 
             UpdateSlotTeamInBattle();
         }
-
-
-
-
         private void UpdateSlotTeamInBattle()
         {
             foreach (var slotView in heroSlotViews)
@@ -842,8 +800,8 @@ namespace MVC.Controller
         {
             foreach (var slotView in heroSlotViews)
             {
-                slotView.SetEmpty(); 
-                slotView.ShowNoneSlot(); 
+                slotView.SetEmpty();
+                slotView.ShowNoneSlot();
             }
         }
         private void ClearAllEnemySlots()
@@ -858,8 +816,8 @@ namespace MVC.Controller
 
         #region CheckEndGame
         private bool IsEndGame()
-        { 
-            return IsOutOfHero()||IsOutOfEnemy();
+        {
+            return IsOutOfHero() || IsOutOfEnemy();
         }
         private bool IsOutOfHero()
         {
@@ -873,35 +831,46 @@ namespace MVC.Controller
         private int GetTotalHeroInCurrentLevel()
         {
             int count = 0;
-            for(int i =0;i< heroSlotViews.Length; i++)
+            for (int i = 0; i < heroSlotViews.Length; i++)
             {
                 var slotView = heroSlotViews[i];
                 if (slotView.Data.HeroSlotState == HeroSlotState.Occupied)
                 {
-                   count++;
+                    count++;
                 }
             }
             return count;
         }
+
         #endregion
 
         #region ButtonEndGame
         public void PlayAgainAfterLose()
         {
-            // Giảm số lượng trái tim
             data.Heart -= 1;
             if (data.Heart <= 0)
             {
-                // Nếu hết trái tim, có thể hiển thị màn hình game over hoặc logic khác
                 Debug.Log("Game Over! No hearts left.");
                 return;
             }
 
-            
             battleHUD.UpdateHeart(data.Heart);
             data.CurrentLevel = levelController.GetCurrentLevel();
             battleHUD.SetLevel(data.CurrentLevel);
 
+            int initialCoins = levelController.GetInitialCoinsForLevel(data.CurrentLevel);
+            data.InitCoin = initialCoins;
+
+            // Không tăng currentLevel, load lại level hiện tại
+            ResetForCurrentLevel();
+        }
+        public void PlayAgainAfterDraw()
+        {
+            data.CurrentLevel = levelController.GetCurrentLevel();
+            battleHUD.SetLevel(data.CurrentLevel);
+
+            int initialCoins = levelController.GetInitialCoinsForLevel(data.CurrentLevel);
+            data.InitCoin = initialCoins;
             // Không tăng currentLevel, load lại level hiện tại
             ResetForCurrentLevel();
         }
@@ -909,7 +878,7 @@ namespace MVC.Controller
         public void ResetForCurrentLevel()
         {
             remainHero = 0;
-            remainEnemy = 0;    
+            remainEnemy = 0;
             ClearAllHeroSlots();
             ClearAllEnemySlots();
 
@@ -918,5 +887,7 @@ namespace MVC.Controller
             StartCoroutine(PrepareBattle());
         }
         #endregion
+
+
     }
 }

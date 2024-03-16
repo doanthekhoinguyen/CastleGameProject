@@ -140,7 +140,6 @@ namespace MVC.View
 
         public void GetDamage(int damage)
         {
-         
 
             //Debug.Log(this.heroSlotView.Data.HeroModel.objectName + " GET DAMAGE " + damage.ToString());
             data.hp = Math.Max(0, data.hp - damage * (1 - data.defense / 100));
@@ -166,7 +165,7 @@ namespace MVC.View
         private IEnumerator ShowDeadAnim()
         {
             ChangeAnim(State);
-            yield return new WaitForSeconds(2f);
+            yield return new WaitForSeconds(1.5f);
 
             // Kiểm tra và kích hoạt ability Faint
             foreach (var ability in data.abilities)

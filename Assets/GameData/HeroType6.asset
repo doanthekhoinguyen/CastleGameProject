@@ -14,21 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 5
   objectName: Bobpy
-  hp: 4
-  attack: 5
+  hp: 15
+  attack: 6
   defense: 0
   attackSpeed: 1
   attackType: 0
   abilityTriggeredThisTurn: 0
   abilities:
-  - Type: 0
-    target: 0
+  - Type: 2
+    target: 3
     effect: 0
-    hpChange: -1
-    atkChange: 1
+    hpChange: 0
+    atkChange: 6
     description: Start of Turn -> buff 1 hp
   fullPortraitPath: HeroType6-full
   miniPortraitPath: HeroType6-mini
-  coin: 3
+  coin: 35
+  unlockLevel: 5
   upgradeLevel: 1
   maxUpgradeLevel: 3

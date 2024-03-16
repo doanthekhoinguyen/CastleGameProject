@@ -13,6 +13,7 @@ namespace MVC.Model
         public string fullPortraitPath;
         public string miniPortraitPath;
         public int coin;
+        public int unlockLevel;
         public int upgradeLevel = 1;
         public int maxUpgradeLevel = 3;
     }

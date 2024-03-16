@@ -14,21 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 0
   objectName: PeaSant
-  hp: 6
+  hp: 5
   attack: 1
   defense: 0
   attackSpeed: 1
   attackType: 0
   abilityTriggeredThisTurn: 0
   abilities:
-  - Type: 1
+  - Type: 0
     target: 0
     effect: 0
-    hpChange: 20
-    atkChange: 1
-    description: 
+    hpChange: 2
+    atkChange: 0
+    description: Start Of Battle -> Give 2 HP to self
   fullPortraitPath: HeroType1-full
   miniPortraitPath: HeroType1-mini
-  coin: 3
+  coin: 10
+  unlockLevel: 1
   upgradeLevel: 1
   maxUpgradeLevel: 3

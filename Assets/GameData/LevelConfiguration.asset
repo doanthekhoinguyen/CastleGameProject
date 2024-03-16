@@ -18,34 +18,85 @@ MonoBehaviour:
     - enemyType: 0
       slotIndex: 0
       level: 1
-    - enemyType: 1
+    - enemyType: 0
       slotIndex: 1
       level: 1
-    - enemyType: 0
-      slotIndex: 2
-      level: 1
-    initialCoin: 10
+    initialCoin: 25
   - levelNumber: 2
     enemiesToSpawn:
     - enemyType: 0
       slotIndex: 0
-      level: 0
+      level: 1
+    - enemyType: 1
+      slotIndex: 1
+      level: 1
+    - enemyType: 0
+      slotIndex: 2
+      level: 1
+    initialCoin: 35
+  - levelNumber: 3
+    enemiesToSpawn:
+    - enemyType: 1
+      slotIndex: 0
+      level: 1
+    - enemyType: 0
+      slotIndex: 1
+      level: 1
+    - enemyType: 3
+      slotIndex: 2
+      level: 1
+    - enemyType: 0
+      slotIndex: 3
+      level: 1
+    initialCoin: 50
+  - levelNumber: 4
+    enemiesToSpawn:
+    - enemyType: 1
+      slotIndex: 0
+      level: 1
+    - enemyType: 0
+      slotIndex: 1
+      level: 1
+    - enemyType: 3
+      slotIndex: 2
+      level: 1
+    - enemyType: 0
+      slotIndex: 3
+      level: 1
+    initialCoin: 60
+  - levelNumber: 5
+    enemiesToSpawn:
+    - enemyType: 4
+      slotIndex: 0
+      level: 1
     - enemyType: 2
       slotIndex: 1
-      level: 0
+      level: 2
     - enemyType: 1
       slotIndex: 2
-      level: 0
-    initialCoin: 12
-  - levelNumber: 3
+      level: 1
+    - enemyType: 3
+      slotIndex: 3
+      level: 1
+    - enemyType: 0
+      slotIndex: 3
+      level: 1
+    initialCoin: 70
+  - levelNumber: 6
     enemiesToSpawn:
     - enemyType: 0
       slotIndex: 0
-      level: 0
+      level: 1
     - enemyType: 4
       slotIndex: 1
-      level: 0
-    - enemyType: 2
+      level: 1
+    - enemyType: 3
       slotIndex: 2
-      level: 0
-    initialCoin: 15
+      level: 1
+    - enemyType: 4
+      slotIndex: 3
+      level: 1
+    - enemyType: 0
+      slotIndex: 3
+      level: 3
+    initialCoin: 70
